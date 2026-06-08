@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_compile_options(-Wfatal-errors)
+add_compile_options(-Werror=return-type)
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     # Не больше одной ошибки за раз
     add_compile_options(-fmax-errors=1)
