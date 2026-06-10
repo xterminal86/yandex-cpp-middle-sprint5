@@ -9,8 +9,9 @@ namespace geometry::convex_hull {
 
 double CrossProduct(Point2D p1, Point2D middle, Point2D p2);
 
-class StackForGrahamScan {
-public:
+class StackForGrahamScan
+{
+  public:
     void Push(const Point2D &p) { s.push_back(p); }
     void Pop() { s.pop_back(); }
 
@@ -20,7 +21,7 @@ public:
 
     std::vector<Point2D> &&Extract() & { return std::move(s); }
 
-private:
+  private:
     std::vector<Point2D> s;
 };
 

@@ -15,14 +15,16 @@ namespace geometry::intersections {
 *
 * Для всех остальных требуется выбросить исключение std::logic_error
 */
-class IntersectionVisitor {
-public:
-
+class IntersectionVisitor
+{
+  public:
     /* ваш код здесь */
 };
 
-inline std::optional<Point2D> GetIntersectPoint(const Shape &shape1, const Shape &shape2) {
-    return std::nullopt;
+inline std::optional<Point2D> GetIntersectPoint(const Shape &shape1,
+                                                const Shape &shape2)
+{
+  return std::nullopt;
 }
 
 }  // namespace geometry::intersections

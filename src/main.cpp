@@ -15,103 +15,135 @@ using namespace geometry;
 namespace rng = std::ranges;
 namespace views = std::ranges::views;
 
-void PrintAllIntersections(const Shape &shape, std::span<const Shape> others) {
-    std::println("\n=== Intersections ===");
+void PrintAllIntersections(const Shape &shape, std::span<const Shape> others)
+{
+  std::println("\n=== Intersections ===");
 
-    /*
-     * Используйте ranges чтобы оставить только фигуры,
-     * поддерживающие возможность находить пересечения между собой
-     *
-     * Затем примените монадический интерфейс для обработки результатов:
-     *     - Пересечение найдено в точке A между фигурами B и C
-     *     - Фигуры B и C не пересекаются
-     */
+  /*
+    * Используйте ranges чтобы оставить только фигуры,
+    * поддерживающие возможность находить пересечения между собой
+    *
+    * Затем примените монадический интерфейс для обработки результатов:
+    *     - Пересечение найдено в точке A между фигурами B и C
+    *     - Фигуры B и C не пересекаются
+  */
 }
 
-void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes) {
-    std::println("\n=== Distance from Point Test ===");
+// =============================================================================
 
-    /*
-     * Используйте ranges чтобы выбрать любые 5 фигур из списка.
-     * Затем найдите расстояния от заданной точки до всех выбранных фигур.
-     * Выведите результат в формате "Расстояние от точки P до фигуры S равно D"
-     */
+void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes)
+{
+  std::println("\n=== Distance from Point Test ===");
+
+  /*
+    * Используйте ranges чтобы выбрать любые 5 фигур из списка.
+    * Затем найдите расстояния от заданной точки до всех выбранных фигур.
+    * Выведите результат в формате "Расстояние от точки P до фигуры S равно D"
+  */
 }
 
-void PerformShapeAnalysis(std::span<const Shape> shapes) {
-    std::println("\n=== Shape Analysis ===");
+// =============================================================================
 
-    /*
-     * Используйте ranges и созданные классы чтобы:
-     *     - Найти все пересечения между фигурами используя метод Bounding Box
-     *     - Найти самую высокую фигуру (чья высота наибольшая)expected
-     *     - Вывести расстояние между любыми двумя фигурами, которые поддерживают данную функциональность
-     */
+void PerformShapeAnalysis(std::span<const Shape> shapes)
+{
+  std::println("\n=== Shape Analysis ===");
+
+  /*
+    * Используйте ranges и созданные классы чтобы:
+    *     - Найти все пересечения между фигурами используя метод Bounding Box
+    *     - Найти самую высокую фигуру (чья высота наибольшая)expected
+    *     - Вывести расстояние между любыми двумя фигурами, которые поддерживают
+    *       данную функциональность
+  */
 }
 
-void PerformExtraShapeAnalysis(std::span<const Shape> shapes) {
-    std::println("\n=== Shape Extra Analysis ===");
+// =============================================================================
 
-    /*
-     * Используйте ranges и созданные классы чтобы:
-     *     - Вывести 3 любые фигуры, которые находятся выше 50.0
-     *     - Вывести фигуры с наименьшей и с наибольшей высотами
-     */
+void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
+{
+  std::println("\n=== Shape Extra Analysis ===");
+
+  /*
+    * Используйте ranges и созданные классы чтобы:
+    *     - Вывести 3 любые фигуры, которые находятся выше 50.0
+    *     - Вывести фигуры с наименьшей и с наибольшей высотами
+  */
 }
 
-int main() {
-    std::vector<Shape> shapes = utils::ParseShapes("circle 0 0 1.5; line 1 2 3 4; polygon 0 0 2 5; triangle 0 0 1 0 0.5 1; polygon 0 0 1 2; badshape; circle 0 0 -1");
-    std::println("Parsed {} shapes", shapes.size());
+// =============================================================================
 
-    // Выведите индекс каждой фигуры и её высоту
+int main()
+{
+  std::vector<Shape> shapes =
+  utils::ParseShapes(
+    "circle 0 0 1.5; "
+    "line 1 2 3 4; "
+    "polygon 0 0 2 5; "
+    "triangle 0 0 1 0 0.5 1; "
+    "polygon 0 0 1 2; "
+    "badshape; "
+    "circle 0 0 -1"
+  );
 
-    //
-    // Вызываем разработанные функции
-    //
-    PrintAllIntersections(shapes[0], shapes);
+  std::println("Parsed {} shapes", shapes.size());
 
-    PrintDistancesFromPointToShapes(Point2D{10.0, 10.0}, shapes);
+  // Выведите индекс каждой фигуры и её высоту
 
-    PerformShapeAnalysis(shapes);
+  //
+  // Вызываем разработанные функции
+  //
+  PrintAllIntersections(shapes[0], shapes);
 
-    PerformExtraShapeAnalysis(shapes);
+  PrintDistancesFromPointToShapes(Point2D{10.0, 10.0}, shapes);
 
-    //
-    // Рисуем все фигуры
-    //
-    // Важно: после изучения графика - нажмите Enter чтобы продолжить выполнение и построить 2ой график
-    //
-    geometry::visualization::Draw(shapes);
+  PerformShapeAnalysis(shapes);
 
-    //
-    // Формируем список из вершин всех фигур
-    //
-    std::vector<Point2D> points;
+  PerformExtraShapeAnalysis(shapes);
 
-    /* ваш код здесь */
+  //
+  // Рисуем все фигуры
+  //
+  // Важно: после изучения графика - нажмите Enter чтобы продолжить выполнение и построить 2ой график
+  //
+  geometry::visualization::Draw(shapes);
 
-    //
-    // Находим список точек, для построения выпуклой оболочки - convex hull - алгоритмом Грэхема 
-    // Создаём из них объект класса `Polygon` и добавляем его в список shapes
-    // Рисуем все фигуры
-    //
+  //
+  // Формируем список из вершин всех фигур
+  //
+  std::vector<Point2D> points;
 
-    /* ваш код здесь */
+  /* ваш код здесь */
 
-    //
-    // после изучения графика - нажмите Enter чтобы продолжить выполнение и построить 3ий график
-    //
+  //
+  // Находим список точек, для построения выпуклой оболочки - convex hull - алгоритмом Грэхема
+  // Создаём из них объект класса `Polygon` и добавляем его в список shapes
+  // Рисуем все фигуры
+  //
 
+  /* ваш код здесь */
+
+  //
+  // после изучения графика - нажмите Enter чтобы продолжить выполнение и построить 3ий график
+  //
+
+  {
+    std::vector<Point2D> points =
     {
-        std::vector<Point2D> points = {{0, 0}, {10, 0}, {5, 8}, {15, 5}, {2, 12}};
+        {  0,  0 }
+      , { 10,  0 }
+      , {  5,  8 }
+      , { 15,  5 }
+      , {  2, 12 }
+    };
 
-        //
-        // Используйте список точек points или свой, чтобы
-        // выполнить алгоритм триангуляции Делоне алгоритмом Боуэра-Ватсона
-        //
-        // После успешного завершения алгоритма - выведите результат для проверки
-        // используя geometry::visualization::Draw
-        //
-    }
-    return 0;
+    //
+    // Используйте список точек points или свой, чтобы
+    // выполнить алгоритм триангуляции Делоне алгоритмом Боуэра-Ватсона
+    //
+    // После успешного завершения алгоритма - выведите результат для проверки
+    // используя geometry::visualization::Draw
+    //
+  }
+
+  return 0;
 }
