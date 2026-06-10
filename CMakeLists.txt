@@ -35,21 +35,21 @@ CPMAddPackage(
     GIT_TAG v1.2.2
 )
 
-file(GLOB HEADER_FILES "${CMAKE_SOURCE_DIR}/include/*.hpp")
-file(GLOB SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
+file(GLOB SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp" "${CMAKE_SOURCE_DIR}/src/*.hpp")
 list(REMOVE_ITEM SRC_FILES "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
 # Создаём статическую библиотеку
 add_library(${PROJECT_NAME}_imp STATIC "${CMAKE_SOURCE_DIR}/src/main.cpp" ${SRC_FILES} ${HEADER_FILES})
 
 # Добавляем в проект используемые сторонние библиотеки
-target_include_directories(${PROJECT_NAME}_imp
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-    # Помечаем используемые сторонние библиотеки как external, чтобы игнорировать их сообщения об ошибках
-    SYSTEM PUBLIC
-        ${CPM_PACKAGE_NAME_INCLUDE_DIRS}
+target_include_directories(
+  ${PROJECT_NAME}_imp
+  # Помечаем используемые сторонние библиотеки как external, чтобы игнорировать их сообщения об ошибках
+  SYSTEM PUBLIC
+  ${CMAKE_SOURCE_DIR}/src/
+  ${CPM_PACKAGE_NAME_INCLUDE_DIRS}
 )
+
 target_link_libraries(${PROJECT_NAME}_imp PRIVATE matplot)
 
 # Создаём исполняемый таргет и линкуем к нему статическую библиотеку
