@@ -5,6 +5,7 @@
 #include <set>
 #include <vector>
 #include <stdexcept>
+#include <expected>
 
 namespace geometry::triangulation {
 
@@ -104,12 +105,15 @@ struct Edge {
 };
 
 //Ваш код здесь
-inline std::vector<DelaunayTriangle>
-DelaunayTriangulation(std::span<const Point2D> points)
+using DelaunayResult = std::expected<std::vector<DelaunayTriangle>, std::string>;
+
+inline DelaunayResult DelaunayTriangulation(
+  std::span<const Point2D> points
+) noexcept
 {
   if (points.size() < 3)
   {
-    throw std::logic_error(
+    return std::unexpected(
       "At least three points are required for triangulation."
     );
   }

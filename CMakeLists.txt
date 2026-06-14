@@ -8,6 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_compile_options(-Wfatal-errors)
 add_compile_options(-Werror=return-type)
+add_compile_options(-ggdb)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     # Не больше одной ошибки за раз

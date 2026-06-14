@@ -4,6 +4,7 @@
 #include <ranges>
 #include <stack>
 #include <vector>
+#include <expected>
 
 namespace geometry::convex_hull {
 
@@ -26,6 +27,7 @@ class StackForGrahamScan
 };
 
 //Ваш код здесь
-std::vector<Point2D> GrahamScan(std::span<Point2D> points);
+using GrahamScanResult = std::expected<std::vector<Point2D>, std::string>;
+GrahamScanResult GrahamScan(std::span<Point2D> points) noexcept;
 
 }  // namespace geometry::convex_hull

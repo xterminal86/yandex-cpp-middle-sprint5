@@ -8,7 +8,8 @@ namespace geometry::intersections {
 /*
 * Класс для поиска пересечений между двумя фигурами
 *
-* Требуется организовать возможность нахождения пересечений только для следующих комбинаций фигур:
+* Требуется организовать возможность нахождения пересечений только для следующих
+* комбинаций фигур:
 *    - Line   & Line
 *    - Line   & Circle
 *    - Circle & Circle
@@ -21,8 +22,8 @@ class IntersectionVisitor
     /* ваш код здесь */
 };
 
-inline std::optional<Point2D> GetIntersectPoint(const Shape &shape1,
-                                                const Shape &shape2)
+inline std::optional<Point2D> GetIntersectPoint(const Shape& shape1,
+                                                const Shape& shape2)
 {
   return std::nullopt;
 }

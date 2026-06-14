@@ -10,12 +10,17 @@
 #include <print>
 #include <ranges>
 
+// Столько неймспейсов только мешают.
+// Надо было засунуть всё в один, максимум два.
 using namespace geometry;
+using namespace geometry::convex_hull;
+using namespace geometry::triangulation;
+using namespace geometry::visualization;
 
 namespace rng = std::ranges;
 namespace views = std::ranges::views;
 
-void PrintAllIntersections(const Shape &shape, std::span<const Shape> others)
+void PrintAllIntersections(const Shape& shape, std::span<const Shape> others)
 {
   std::println("\n=== Intersections ===");
 
@@ -74,8 +79,7 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
 
 int main()
 {
-  std::vector<Shape> shapes =
-  utils::ParseShapes(
+  std::vector<Shape> shapes = utils::ParseShapes(
     "circle 0 0 1.5; "
     "line 1 2 3 4; "
     "polygon 0 0 2 5; "
@@ -87,7 +91,37 @@ int main()
 
   std::println("Parsed {} shapes", shapes.size());
 
+  uint64_t index = 0;
+
   // Выведите индекс каждой фигуры и её высоту
+  for (const Shape& shape : shapes)
+  {
+    shape.visit(
+      [&index](const auto& s)
+      {
+        if constexpr (
+          std::is_same_v<std::remove_cvref_t<decltype(s)>, std::monostate>
+        )
+        {
+          std::println("{}. shape is std::monostate!", index);
+        }
+        else
+        {
+          std::println("{}. height = {}", index, s.Height());
+
+          // Это говно всё равно не работает.
+          //std::println("{}", s);
+
+          for (const Point2D& p : s.Vertices())
+          {
+            std::println("  ({}, {})", p.x, p.y);
+          }
+        }
+
+        index++;
+      }
+    );
+  }
 
   //
   // Вызываем разработанные функции
@@ -103,7 +137,8 @@ int main()
   //
   // Рисуем все фигуры
   //
-  // Важно: после изучения графика - нажмите Enter чтобы продолжить выполнение и построить 2ой график
+  // Важно: после изучения графика - нажмите Enter чтобы продолжить выполнение и
+  // построить 2ой график
   //
   geometry::visualization::Draw(shapes);
 
@@ -112,20 +147,68 @@ int main()
   //
   std::vector<Point2D> points;
 
-  /* ваш код здесь */
+  for (const Shape& shape : shapes)
+  {
+    shape.visit(
+      [&points](const auto& s)
+      {
+        if constexpr (
+          std::is_same_v<std::remove_cvref_t<decltype(s)>, std::monostate>
+        )
+        {
+          std::println("{}:{} - shape is std::monostate!", __FILE__, __LINE__);
+        }
+        else
+        {
+          for (const Point2D& p : s.Vertices())
+          {
+            points.push_back(p);
+          }
+        }
+      }
+    );
+  }
 
   //
-  // Находим список точек, для построения выпуклой оболочки - convex hull - алгоритмом Грэхема
+  // Находим список точек, для построения выпуклой оболочки - convex hull -
+  // алгоритмом Грэхема
   // Создаём из них объект класса `Polygon` и добавляем его в список shapes
   // Рисуем все фигуры
   //
 
-  /* ваш код здесь */
+  GrahamScanResult convexHull = GrahamScan(points);
+  if (not convexHull)
+  {
+    std::println("{}:{} - convex hull construction failed for points:",
+                 __FILE__, __LINE__);
+
+    for (const Point2D& p : points)
+    {
+      std::println("  ({}, {})", p.x, p.y);
+    }
+
+    // Почему-то это говно не работает.
+    //std::println("{}:{} - convex hull construction failed for points '{}'",
+    //             __FILE__, __LINE__, points);
+
+    // И так тоже.
+    //for (const Point2D& p : points)
+    //{
+    //  std::println("  {}", p);
+    //}
+  }
+  else
+  {
+    Polygon p(convexHull.value());
+    shapes.push_back(p);
+
+    geometry::visualization::Draw(shapes);
+  }
 
   //
-  // после изучения графика - нажмите Enter чтобы продолжить выполнение и построить 3ий график
+  // после изучения графика - нажмите Enter чтобы продолжить выполнение и
+  // построить 3ий график
   //
-
   {
     std::vector<Point2D> points =
     {
@@ -143,7 +226,24 @@ int main()
     // После успешного завершения алгоритма - выведите результат для проверки
     // используя geometry::visualization::Draw
     //
+    DelaunayResult res = DelaunayTriangulation(points);
+    if (res)
+    {
+      geometry::visualization::Draw(res.value());
+    }
+    else
+    {
+      std::println("{}:{} - triangulation failed for points:",
+                   __FILE__, __LINE__);
+
+      for (const Point2D& p : points)
+      {
+        std::println("  ({}, {})", p.x, p.y);
+      }
+    }
   }
+
+  std::println("All done!\n");
 
   return 0;
 }
