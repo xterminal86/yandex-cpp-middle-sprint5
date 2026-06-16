@@ -21,6 +21,39 @@ class IntersectionVisitor
   public:
     bool operator()(const Line& l1, const Line& l2)
     {
+
+      // 1. Using parametric line equations:
+      //
+      // d1 = l1.end - l1.start
+      // d2 = l2.end - l2.start
+      //
+      // l1.start + t*d1
+      // l2.start + u*d2
+      //
+      // define line intersection:
+      //
+      // l1.start + t*d1 = l2.start + u*d2
+      //
+      // Set up the system:
+      //
+      // l1.sx + t*d1.x = l2.sx + u*d2.x
+      // l1.sy + t*d1.y = l2.sy + u*d2.y
+      //
+      // Solve the system against t and u using Cramer's method.
+      //
+      // t*d1.x - u*d2.x = l2.sx - l1.sx
+      // t*d1.y - u*d2.y = l2.sy - l1.sy
+      //
+      // Main determinant (D):
+      //
+      // D = (d1.x * d2.y) - (d1.y * d2.x)
+      //
+      // Auxillary determinants:
+      //
+      // Nt = d2.x * (l2.sy - l1.sy) - ( d2.y * (l2.sx - l1.sx) )
+      // Nu = d1.x * (l2.sy - l1.sy) - ( d1.y * (l2.sx - l1.sx) )
+      //
+      //
       return true;
     }
 
