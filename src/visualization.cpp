@@ -5,11 +5,6 @@
 #include <print>
 #include <variant>
 
-template <class... Ts>
-struct Multilambda : Ts... {
-  using Ts::operator()...;
-};
-
 namespace geometry::visualization {
 
 matplot::figure_handle DrawConfig()

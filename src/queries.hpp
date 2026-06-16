@@ -3,20 +3,22 @@
 #include <algorithm>
 #include <optional>
 #include <variant>
+#include <print>
 
 namespace geometry::queries {
-
-template <class... Ts>
-struct Multilambda : Ts...
-{
-  using Ts::operator()...;
-};
 
 struct DistanceVisitor
 {
   Point2D point;
 
   explicit DistanceVisitor(const Point2D &p) : point(p) {}
+
+  double operator()(const std::monostate& s) const
+  {
+    std::println("{}:{} - operator() is called on std::monostate!",
+                 __FILE__, __LINE__);
+    return -std::numeric_limits<double>::infinity();
+  }
 
   double operator()(const Line &line) const
   {
@@ -91,6 +93,12 @@ struct DistanceVisitor
       min_distance = std::min(min_distance, point.DistanceTo(p));
     }
     return min_distance;
+  }
+
+  template <typename T>
+  double operator()(const T&)
+  {
+    return 0.0;
   }
 };
 
@@ -100,6 +108,13 @@ struct PointToShapeDistanceVisitor
 
   explicit PointToShapeDistanceVisitor(const Point2D &p) : point(p) {}
 
+  double operator()(const std::monostate& s) const
+  {
+    std::println("{}:{} - operator() is called on std::monostate!",
+                 __FILE__, __LINE__);
+    return -std::numeric_limits<double>::infinity();
+  }
+
   double operator()(const Line &line) const
   {
     Point2D line_vec = line.end - line.start;
@@ -174,6 +189,18 @@ struct PointToShapeDistanceVisitor
     }
     return min_distance;
   }
+
+  template <typename T>
+  double operator()(const T&)
+  {
+    // Since it's a fallback for unsupported type we shouldn't abort
+    // compilation here.
+    //static_assert(
+    //  not std::is_same_v<T, T>,
+    //  "Unsupported type in operator() for PointToShapeDistanceVisitor"
+    //);
+    return 0.0;
+  }
 };
 
 struct PointInShapeVisitor
@@ -181,6 +208,13 @@ struct PointInShapeVisitor
     Point2D point;
 
     explicit PointInShapeVisitor(const Point2D &p) : point(p) {}
+
+    double operator()(const std::monostate& s) const
+    {
+      std::println("{}:{} - operator() is called on std::monostate!",
+                   __FILE__, __LINE__);
+      return -std::numeric_limits<double>::infinity();
+    }
 
     bool operator()(const Line &line) const
     {
@@ -234,6 +268,36 @@ struct PointInShapeVisitor
       return point.DistanceTo(circle.center_p) <= circle.radius;
     }
 
+    // fallback for all unsupported combinations
+    template <typename T>
+    bool operator()(const T &) const
+    {
+      //
+      // Nice little trick: (sizeof(T) == 0) is always false.
+      // We can't write static_assert(false, ...) here because in that case
+      // compilation will always fail, but sizeof(T) is evaluated at
+      // instantiation time.
+      //
+      //static_assert(
+      //  sizeof(T) == 0,
+      //  "unsupported type in operator() for PointInShapeVisitor"
+      //);
+      //
+
+      //
+      // or, better yet, use more modern approach:
+      //
+      //static_assert(
+      //  not std::is_same_v<T, T>,
+      //  "unsupported type in operator() for PointInShapeVisitor"
+      //);
+
+      // We probably shouldn't abort compilation here, because it's assumed that
+      // incompatible types are not overlapping.
+
+      return false;
+    }
+
 private:
     bool point_in_polygon_ray_casting(
       const Point2D &p,
@@ -261,6 +325,14 @@ private:
 
 struct ShapeToShapeDistanceVisitor
 {
+  std::optional<double>
+  operator()(const std::monostate&, const std::monostate&) const
+  {
+    std::println("{}:{} - operator() is called on std::monostate!",
+                 __FILE__, __LINE__);
+    return std::nullopt;
+  }
+
   std::optional<double> operator()(const Circle &c1, const Circle &c2) const
   {
     double centerDistance = c1.center_p.DistanceTo(c2.center_p);
@@ -284,6 +356,13 @@ struct ShapeToShapeDistanceVisitor
   template <typename T, typename U>
   std::optional<double> operator()(const T &, const U &) const
   {
+    //static_assert(
+    //  (not std::is_same_v<T, T>
+    //or not std::is_same_v<U, U>),
+    //  "Unsupported type combination in operator() "
+    //  "for ShapeToShapeDistanceVisitor"
+    //);
+
     return std::nullopt;
   }
 };
@@ -294,20 +373,42 @@ struct ShapeToShapeDistanceVisitor
 */
 inline double DistanceToPoint(const Shape& shape, const Point2D& point)
 {
-  /* ваш код с PointToShapeDistanceVisitor здесь*/
-  return 0.0;
+  return std::visit(PointToShapeDistanceVisitor{point}, shape);
 }
 
 inline BoundingBox GetBoundBox(const Shape& shape)
 {
-  /* ваш код с использованием метода BoundBox() здесь */
-  return {};
+  return shape.visit(
+    [](auto&& s)
+    {
+      if constexpr (EmptyVariant<decltype(s)>)
+      {
+        return BoundingBox{};
+      }
+      else
+      {
+        return s.BoundBox();
+      }
+    }
+  );
 }
 
 inline double GetHeight(const Shape& shape)
 {
-  /* ваш код с использованием метода Height() здесь */
-  return 0.0;
+  return shape.visit(
+    [](auto& s)
+    {
+      if constexpr (EmptyVariant<decltype(s)>)
+      {
+        std::println("{}:{} - shape is std::monostate!", __FILE__, __LINE__);
+        return -std::numeric_limits<double>::infinity();
+      }
+      else
+      {
+        return s.Height();
+      }
+    }
+  );
 }
 
 inline bool BoundingBoxesOverlap(const Shape& shape1, const Shape& shape2)
@@ -321,8 +422,7 @@ inline bool BoundingBoxesOverlap(const Shape& shape1, const Shape& shape2)
 inline std::optional<double> DistanceBetweenShapes(const Shape& shape1,
                                                    const Shape& shape2)
 {
-    /* ваш код с ShapeToShapeDistanceVisitor здесь*/
-    return std::nullopt;
+  return std::nullopt;
 }
 
 }  // namespace geometry::queries

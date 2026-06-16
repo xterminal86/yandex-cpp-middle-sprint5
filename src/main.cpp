@@ -49,16 +49,10 @@ void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes)
 
 // =============================================================================
 
-struct HeightVisitor
-{
-  double operator()(std::monostate) const { return 0.0; }
-  template<typename T>
-  double operator()(const T& shape) const { return shape.Height(); }
-};
-
 void PerformShapeAnalysis(std::span<const Shape> shapes)
 {
   using namespace geometry::utils;
+  using namespace geometry::queries;
 
   std::println("\n=== Shape Analysis ===");
 
@@ -70,37 +64,40 @@ void PerformShapeAnalysis(std::span<const Shape> shapes)
         данную функциональность
   */
 
-  // ---------------------- Bounding Box shitcode ------------------------------
+  // --------------------------- Bounding Box  ---------------------------------
 
+  for (size_t i = 0; i < shapes.size(); i++)
+  {
+    for (size_t j = i + 1; j < shapes.size(); j++)
+    {
+      if (BoundingBoxesOverlap(shapes[i], shapes[j]))
+      {
+        std::println("Overlap found for shape {} and shape {}", i, j);
+      }
+    }
+  }
 
-  // ---------------------- Height shitcode ------------------------------------
+  std::println();
+
+  // --------------------------- Height ----------------------------------------
 
   std::optional<size_t> res = FindHighestShape(shapes);
   if (res)
   {
-    size_t ind = *res;
-
-    auto _get_height = [](const Shape& shape)
-    {
-      return std::visit(HeightVisitor{}, shape);
-    };
-
-    auto it = std::ranges::max_element(shapes, std::less<>(), _get_height);
-
-    if (it != shapes.end())
-    {
-      size_t index = std::distance(shapes.begin(), it);
-      std::println("Max height -> shapes[{}] = {}", index, _get_height(*it));
-    }
-    else
-    {
-      std::println("Max height not found!");
-    }
+    size_t index = *res;
+    double h = GetHeight(shapes[index]);
+    std::println("Max height -> shapes[{}] = {}", index, h);
   }
   else
   {
     std::println("Max height not found!");
   }
+
+  std::println();
+
+  // --------------------------- Distance --------------------------------------
+
+  // TODO:
 }
 
 // =============================================================================
@@ -132,6 +129,27 @@ int main()
 
   std::println("Parsed {} shapes", shapes.size());
 
+  //
+  // Кастомный формат почему-то не работает, поэтому приходится всё делать через
+  // жопу.
+  //
+  for (size_t i = 0; i < shapes.size(); i++)
+  {
+    const Shape& s = shapes[i];
+
+    s.visit(
+      [i](auto&& sh)
+      {
+        if constexpr (not EmptyVariant<decltype(sh)>)
+        {
+          std::println("{}. '{}'", i, typeid(sh).name());
+        }
+      }
+    );
+  }
+
+  std::println();
+
   uint64_t index = 0;
 
   // Выведите индекс каждой фигуры и её высоту
@@ -140,9 +158,7 @@ int main()
     shape.visit(
       [&index](const auto& s)
       {
-        if constexpr (
-          std::is_same_v<std::remove_cvref_t<decltype(s)>, std::monostate>
-        )
+        if constexpr (EmptyVariant<decltype(s)>)
         {
           std::println("{}. shape is std::monostate!", index);
         }
@@ -155,7 +171,7 @@ int main()
 
           for (const Point2D& p : s.Vertices())
           {
-            std::println("  ({}, {})", p.x, p.y);
+            std::println("  ({:7.4f}, {:7.4f})", p.x, p.y);
           }
         }
 
@@ -193,9 +209,7 @@ int main()
     shape.visit(
       [&points](const auto& s)
       {
-        if constexpr (
-          std::is_same_v<std::remove_cvref_t<decltype(s)>, std::monostate>
-        )
+        if constexpr (EmptyVariant<decltype(s)>)
         {
           std::println("{}:{} - shape is std::monostate!", __FILE__, __LINE__);
         }

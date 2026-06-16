@@ -462,9 +462,7 @@ std::optional<size_t> FindHighestShape(std::span<const Shape> shapes)
       return std::visit(
         [](const auto& s) -> double
         {
-          if constexpr (
-            std::is_same_v<std::remove_cvref_t<decltype(s)>, std::monostate>
-          )
+          if constexpr (EmptyVariant<decltype(s)>)
           {
             return -std::numeric_limits<double>::infinity();
           }

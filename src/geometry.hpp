@@ -9,6 +9,15 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <concepts>
+
+template <typename T>
+concept EmptyVariant = std::is_same_v<std::remove_cvref_t<T>, std::monostate>;
+
+template <class... Ts>
+struct Multilambda : Ts... {
+  using Ts::operator()...;
+};
 
 namespace geometry {
 
@@ -144,6 +153,16 @@ struct BoundingBox
   constexpr Point2D Center() const noexcept
   {
     return { (min_x + max_x) / 2, (min_y + max_y) / 2 };
+  }
+
+  [[nodiscard]]
+  bool Empty()
+  {
+    double epsilon = std::numeric_limits<double>::epsilon();
+    return (std::abs(min_x) < epsilon
+        and std::abs(min_y) < epsilon
+        and std::abs(max_x) < epsilon
+        and std::abs(max_y) < epsilon);
   }
 };
 
@@ -490,6 +509,21 @@ using Shape = std::variant<
 namespace std {
 
 template <>
+struct formatter<monostate>
+{
+  constexpr auto parse(format_parse_context& ctx)
+  {
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  auto format(const monostate& v, FormatContext& ctx)
+  {
+    return format_to(ctx.out(), "<std::monostate {:#x}>", &v);
+  }
+};
+
+template <>
 struct formatter<vector<geometry::Point2D>>
 {
   bool use_new_line = false;
@@ -650,9 +684,7 @@ struct formatter<geometry::Shape>
     shape.visit(
       [&ctx](const auto& s)
       {
-        if constexpr (
-          std::is_same_v<std::remove_cvref_t<decltype(s)>, std::monostate>
-        )
+        if constexpr (EmptyVariant<decltype(s)>)
         {
           return format_to(ctx.out(), "<std::monostate {:#x}>", &s);
         }
