@@ -460,7 +460,6 @@ std::optional<size_t> FindHighestShape(std::span<const Shape> shapes)
     [](const Shape& shape) -> double
     {
       return std::visit(
-        // fucking 'auto' is mandatory for std::visit pattern.
         [](const auto& s) -> double
         {
           if constexpr (
@@ -479,8 +478,7 @@ std::optional<size_t> FindHighestShape(std::span<const Shape> shapes)
     }
   );
 
-  if (highest_it != shapes.end()
-  and !std::holds_alternative<std::monostate>(*highest_it))
+  if (highest_it != shapes.end())
   {
     return std::distance(shapes.begin(), highest_it);
   }

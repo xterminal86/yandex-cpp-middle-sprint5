@@ -49,17 +49,58 @@ void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes)
 
 // =============================================================================
 
+struct HeightVisitor
+{
+  double operator()(std::monostate) const { return 0.0; }
+  template<typename T>
+  double operator()(const T& shape) const { return shape.Height(); }
+};
+
 void PerformShapeAnalysis(std::span<const Shape> shapes)
 {
+  using namespace geometry::utils;
+
   std::println("\n=== Shape Analysis ===");
 
   /*
-    * Используйте ranges и созданные классы чтобы:
-    *     - Найти все пересечения между фигурами используя метод Bounding Box
-    *     - Найти самую высокую фигуру (чья высота наибольшая)expected
-    *     - Вывести расстояние между любыми двумя фигурами, которые поддерживают
-    *       данную функциональность
+  Используйте ranges и созданные классы чтобы:
+      - Найти все пересечения между фигурами используя метод Bounding Box
+      - Найти самую высокую фигуру (чья высота наибольшая) expected
+      - Вывести расстояние между любыми двумя фигурами, которые поддерживают
+        данную функциональность
   */
+
+  // ---------------------- Bounding Box shitcode ------------------------------
+
+
+  // ---------------------- Height shitcode ------------------------------------
+
+  std::optional<size_t> res = FindHighestShape(shapes);
+  if (res)
+  {
+    size_t ind = *res;
+
+    auto _get_height = [](const Shape& shape)
+    {
+      return std::visit(HeightVisitor{}, shape);
+    };
+
+    auto it = std::ranges::max_element(shapes, std::less<>(), _get_height);
+
+    if (it != shapes.end())
+    {
+      size_t index = std::distance(shapes.begin(), it);
+      std::println("Max height -> shapes[{}] = {}", index, _get_height(*it));
+    }
+    else
+    {
+      std::println("Max height not found!");
+    }
+  }
+  else
+  {
+    std::println("Max height not found!");
+  }
 }
 
 // =============================================================================
