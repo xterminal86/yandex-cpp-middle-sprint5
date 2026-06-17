@@ -49,7 +49,8 @@ class IntersectionVisitor
       //
       // D = (d1.x * -d2.y) - (d1.y * -d2.x)
       //
-      // Auxillary determinants (swap unknown columns with free coefficients):
+      // Auxillary determinants (swap unknown columns with free coefficients
+      // column):
       //
       // Nt = (l2.sx - l1.sx) * -d2.y - (l2.sy - l1.sy) * -d2.x
       // Nu = d1.x * (l2.sy - l1.sy) - ( d1.y * (l2.sx - l1.sx) )
@@ -57,10 +58,11 @@ class IntersectionVisitor
       // t = Nt / D
       // u = Nu / D
       //
-      // If D == 0 then lines don't intersect (they're parallel or collinear).
-      // For intersection to occur 't' and 'u' must fall between 0 and 1.
+      // If D == 0 then line segments don't intersect (they're parallel or
+      // collinear). For line segments intersection to occur 't' and 'u' must
+      // fall between 0 and 1.
       //
-      // Contact point can then be found like so:
+      // Intersection point can then be found like so:
       //
       // intersection_x = l1.start.x + t * (l1.end.x - l1.start.x)
       // intersection_y = l1.start.y + t * (l1.end.y - l1.start.y)
@@ -113,112 +115,194 @@ class IntersectionVisitor
       return std::nullopt;
     }
 
+    // =========================================================================
+
     std::optional<Point2D> operator()(const Line& l, const Circle& c)
     {
-      Point2D lineVector   = l.end - l.start;
-      Point2D circleToLine = c.center_p - l.start;
+      Point2D lineVector = l.end - l.start;
 
       //
-      // Divide projection on lineVector by its length (since lineVector can be
-      // interpreted as a vector originating from (0,0) ) to get a "percentage"
-      // of projection's length compared to whole line (lineVector) length.
-      // This variant uses squared magnitude to avoid square root computation.
+      // We must subtract line start from circle's center. Look below for
+      // details on why. Basically it's because math says so (look for (A - C)).
       //
-      // Step by step explanation (d is lineVector, A -> l.start,
-      // C - c.center_p):
-      //
-      // 1. Our condition that we're getting at - find a point on the line so
-      //    that dot product of vector from that point to circle's center and
-      //    line vector itself gives 0, since that's the marker of
-      //    perpendicularity:
-      //
-      // (C - (A + t*d)) * d = 0
-      //
-      // 2. Solve for t:
-      //
-      // (C - A - t*d) * d = 0
-      // C*d - A*d - t*(d * d) = 0
-      // (C - A) * d - t*(d * d) = 0
-      // t*(d * d) = (C - A) * d
-      // t = (C - A) * d / (d * d)
-      //
-      // More intuitive approach would be to normalize 'd' first, which will
-      // leave just a dot product for calculating a projection, but this would
-      // involve calculating square root first to normalize 'd'.
-      //
-      double percentage =
-        circleToLine.Dot(lineVector) / lineVector.Dot(lineVector);
+      Point2D circleToLine = l.start - c.center_p;
 
       //
-      // Advance line's starting point by percentage along itself to get to the
-      // perpendicular point.
+      // Recall circle equation:
       //
-      Point2D closestToCircle =
-      {
-        { l.start.x + percentage * lineVector.x },
-        { l.start.y + percentage * lineVector.y }
-      };
+      // x^2 + y^2 = r^2
+      //
+      // For circle at point (px, py) this will become:
+      //
+      // (x - px)^2 + (y - py)^2 = r^2
+      //
+      // Parametric equation of an infinite line:
+      //
+      // P(t) = A + t * d
+      //
+      // Where:
+      //
+      // A = l.start
+      // d = (l.end - l.start)
+      //
+      // To get an intersection point we need to find value of 't' for the line
+      // that gives a point for which length of a difference vector between
+      // circle's center point and this point on a line equals to circle's
+      // radius (since for any point where line crosses the circle we can draw
+      // a line from circle's center to this point and it will be the radius of
+      // the circle).
+      //
+      // So we need to find point P on the line:
+      //
+      // P = A + t * d
+      //
+      // for which:
+      //
+      // |(P - C)| = r
+      //
+      // Plug in line parametric equation for P:
+      //
+      // |(A + t * d) - C| = r
+      //
+      // Our goal is to find t.
+      //
+      // We can square all that to leverage the fact that for any vector:
+      //
+      // |v|^2 = v * v (dot product)
+      //
+      // (A + t * d - C)^2 = r^2
+      //
+      // We can rearrange the stuff inside the braces:
+      //
+      // (A - C + t * d)^2 = r^2
+      //
+      // Note that (A - C) -> circleToLine (let's call it c2l for short) and
+      // d -> lineVector:
+      //
+      // (c2l + t * d)^2 = r^2
+      //
+      // Open up the braces:
+      //
+      // c2l^2 + 2 * c2l * t * d + (t * d) ^ 2       = r^2
+      // c2l * c2l + 2 * c2l * t * d + (t*d) * (t*d) = r^2
+      // c2l * c2l + 2 * c2l * t * d + t*t * d*d     = r^2
+      //
+      // Rearrange terms:
+      //
+      // (d*d)*t^2 + 2 * c2l * t * d + (c2l^2 - r^2) = 0
+      //
+      // If we alias some variables this will start to look familiar:
+      //
+      // (d*d)         = A
+      // (2 * c2l * d) = B
+      // (c2l^2 - r^2) = C
+      //
+      // At^2 + Bt + C = 0
+      //
+      // We have a quadratic equation!
+      //
+      // So from now on it's high school math.
+      //
+      // D < 0 means no intersection.
+      //
+      // Also we must remember that we're dealing with line segment here,
+      // so after / if we found the solution, we must check that 't' falls into
+      // [0, 1] range. If it doesn't then there's no intersection as well
+      // (meaning line lies somewhere "outside" the circle).
+      //
+      // =======================================================================
+      // PRO TIP:
+      //
+      // Given circle and line equations:
+      //
+      // x^2 + y^2 = r^2
+      // y = kx + b
+      //
+      // to check if they intersect you can solve the system by just plugging
+      // a line equation in directly into circle equation - that way you'll be
+      // trying to find a point on a circle that is the same as the point on the
+      // line:
+      //
+      // x^2 + (kx + b)^2 = r^2
+      // x^2 + (kx)^2 + 2*kx*b + b^2 - r^2 = 0
+      // x^2 + (k^2)*(x^2) + 2*kx*b + b^2 - r^2 = 0
+      // (k^2)*(2x^2) + 2kxb + (b^2 - r^2) = 0
+      //
+      // and try to solve quadratic equation. Each solution gives an
+      // intersection point.
+      // =======================================================================
+      //
 
-      //
-      // Find distance from perpendicular point to the circle's center.
-      //
-      double circleToLineDist = (closestToCircle - c.center_p).Length();
+      // A = (d*d)
+      double A = lineVector.Dot(lineVector);
+      //std::println("A = {:4f}", A);
 
-      // If it's greater than the radius - no intersection.
-      if (circleToLineDist > c.radius)
+      // B = (2 * c2l * d)
+      double B = 2 * circleToLine.Dot(lineVector);
+      //std::println("B = {:4f}", B);
+
+      // C = (c2l^2 - r^2)
+      double C = circleToLine.Dot(circleToLine) - (c.radius * c.radius);
+      //std::println("C = {:4f}", C);
+
+      double D = B*B - 4*A*C;
+      //std::println("D = {:4f}", D);
+
+      if (D < 0.0)
       {
         return std::nullopt;
       }
 
-      // Tangential intersection - one point (i.e. closestToCircle).
-      double epsilon = std::numeric_limits<double>::epsilon();
-      if (std::abs(circleToLineDist - c.radius) < epsilon)
+      double sqrtD = std::sqrt(D);
+
+      double t1 = (-B - sqrtD) / (2 * A);
+      double t2 = (-B + sqrtD) / (2 * A);
+
+      //std::println("t1 = {:4f}", t1);
+      //std::println("t2 = {:4f}", t2);
+
+      std::vector<Point2D> intersectionPoints;
+
+      auto _checker = [&intersectionPoints, &l, &lineVector](double t)
       {
-        return closestToCircle;
+        if (t > 0.0 and t < 1.0)
+        {
+          intersectionPoints.push_back(
+            {
+              l.start.x + t * lineVector.x,
+              l.start.y + t * lineVector.y
+            }
+          );
+
+          //std::println("Found intersection point: ({:4f}, {:4f})",
+          //             intersectionPoints.back().x,
+          //             intersectionPoints.back().y);
+        }
+      };
+
+      _checker(t1);
+      _checker(t2);
+
+      if (intersectionPoints.empty())
+      {
+        return std::nullopt;
       }
 
       //
-      // "Normal" intersection - two points. In this case closestToCircle
-      // point will divide circle's chord into two equal parts, which we can
-      // then use to find intersection points by leveraging Pythagoras' theorem:
-      // distance from circle's center to an intersection point in this case
-      // will be equal to circle's radius (and that's a hypotenuse by the way),
-      // and perpendicular we already have (circleToLineDist).
-      // So, all that's left is to subtract hypotenuse from the leg:
-      //
-      double offset =
-        std::sqrt(c.radius * c.radius - circleToLineDist * circleToLineDist);
-
-      //
-      // And now we can add / subtract this offset from perpendicular point to
-      // get intersection points:
-      //
-      double t1 = (percentage - offset) / lineVector.Length();
-      double t2 = (percentage + offset) / lineVector.Length();
-
-      Point2D p1 =
-      {
-        { l.start.x + t1 * lineVector.x },
-        { l.start.y + t1 * lineVector.y },
-      };
-
-      Point2D p2 =
-      {
-        { l.start.x + t2 * lineVector.x },
-        { l.start.y + t2 * lineVector.y },
-      };
-
-      //
       // We have a bit of a problem though: this method's signature requires to
-      // return only 1 point, so let's pick any of the two.
+      // return only 1 point, so let's pick first.
       //
-      return p1;
+      return intersectionPoints[0];
     }
+
+    // =========================================================================
 
     std::optional<Point2D> operator()(const Circle& c, const Line& l)
     {
       return operator()(l, c);
     }
+
+    // =========================================================================
 
     std::optional<Point2D> operator()(const Circle& c1, const Circle& c2)
     {
@@ -257,7 +341,7 @@ class IntersectionVisitor
       //        /    | h
       //      /      |
       //    /    a   |
-      // C1----------x----C2
+      // C1----------z----C2
       //  ^          |    ^
       //  |----------|----|
       //          d  |
@@ -265,7 +349,7 @@ class IntersectionVisitor
       //             |
       //             w - collision point 2
       //
-      // We need to find point x (a, 0). From there we just add / subtract h to
+      // We need to find point z (a, 0). From there we just add / subtract h to
       // get intersection points.
       //
       // For C1:

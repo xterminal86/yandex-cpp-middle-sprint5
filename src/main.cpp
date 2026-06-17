@@ -9,10 +9,12 @@
 #include <algorithm>
 #include <print>
 #include <ranges>
+#include <random>
 
 // Столько неймспейсов только мешают.
 // Надо было засунуть всё в один, максимум два.
 using namespace geometry;
+using namespace geometry::queries;
 using namespace geometry::convex_hull;
 using namespace geometry::triangulation;
 using namespace geometry::visualization;
@@ -118,6 +120,36 @@ void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes)
     * Затем найдите расстояния от заданной точки до всех выбранных фигур.
     * Выведите результат в формате "Расстояние от точки P до фигуры S равно D"
   */
+  std::vector<Shape> random5;
+
+  std::sample(
+    shapes.cbegin(),
+    shapes.cend(),
+    std::back_inserter(random5),
+    5,
+    std::mt19937_64(std::random_device{}())
+  );
+
+  for (const Shape& s: random5)
+  {
+    s.visit(
+      [](auto&& s)
+      {
+        std::println("  calculating distance to shape '{}'",
+                     typeid(s).name());
+      }
+    );
+
+    std::optional<double> d = std::visit(PointToShapeDistanceVisitor(p), s);
+    if (d)
+    {
+      std::println("Distance from P to S = {:4f}", d.value());
+    }
+    else
+    {
+      std::println("Cannot find distance for this point and shape pair!");
+    }
+  }
 }
 
 // =============================================================================
@@ -170,7 +202,44 @@ void PerformShapeAnalysis(std::span<const Shape> shapes)
 
   // --------------------------- Distance --------------------------------------
 
-  // TODO:
+  //
+  // ShapeToShapeDistanceVisitor supports only Line and Circle.
+  //
+  auto lines = shapes | std::views::filter(
+    [](const Shape& s)
+    {
+      return std::holds_alternative<Line>(s);
+    }
+  );
+
+  auto lines_v = lines | std::ranges::to<std::vector>();
+
+  auto circles = shapes | std::views::filter(
+    [](const Shape& s)
+    {
+      return std::holds_alternative<Circle>(s);
+    }
+  );
+
+  auto circles_v = circles | std::ranges::to<std::vector>();
+
+  if (not lines_v.empty() and not circles_v.empty())
+  {
+    std::optional<double> d =
+      std::visit(ShapeToShapeDistanceVisitor{}, lines_v[0], circles_v[0]);
+    if (d)
+    {
+      std::println("Distance between two shapes = {:4f}", d.value());
+    }
+    else
+    {
+      std::println("Distance between two shapes is std::nullopt!");
+    }
+  }
+  else
+  {
+    std::println("Couldn't find suitable shapes to get distance!");
+  }
 }
 
 // =============================================================================
@@ -190,7 +259,6 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
 
 int main()
 {
-  /*
   std::vector<Shape> shapes = utils::ParseShapes(
     "circle 0 0 1.5; "
     "line 1 2 3 4; "
@@ -199,12 +267,6 @@ int main()
     "polygon 0 0 1 2; "
     "badshape; "
     "circle 0 0 -1"
-  );
-  */
-
-  std::vector<Shape> shapes = utils::ParseShapes(
-    "line 1 2 2 4; "
-    "line 2 2 1 3"
   );
 
   std::println("Parsed {} shapes", shapes.size());
