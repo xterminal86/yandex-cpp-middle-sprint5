@@ -40,18 +40,18 @@ class IntersectionVisitor
       // l1.sx + t*d1.x = l2.sx + u*d2.x
       // l1.sy + t*d1.y = l2.sy + u*d2.y
       //
-      // 3. Solve the system against 't' and 'u' using Cramer's Rule.
+      // 3. Solve the system against 't' and 'u' using Cramer's Rule
       //
       // t*d1.x - u*d2.x = l2.sx - l1.sx
       // t*d1.y - u*d2.y = l2.sy - l1.sy
       //
       // Main determinant (D):
       //
-      // D = (d1.x * d2.y) - (d1.y * d2.x)
+      // D = (d1.x * -d2.y) - (d1.y * -d2.x)
       //
-      // Auxillary determinants:
+      // Auxillary determinants (swap unknown columns with free coefficients):
       //
-      // Nt = d2.x * (l2.sy - l1.sy) - ( d2.y * (l2.sx - l1.sx) )
+      // Nt = (l2.sx - l1.sx) * -d2.y - (l2.sy - l1.sy) * -d2.x
       // Nu = d1.x * (l2.sy - l1.sy) - ( d1.y * (l2.sx - l1.sx) )
       //
       // t = Nt / D
@@ -69,40 +69,45 @@ class IntersectionVisitor
       Point2D d1 = l1.end - l1.start;
       Point2D d2 = l2.end - l2.start;
 
-      std::println("d1 = ({}, {})", d1.x, d1.y);
-      std::println("d2 = ({}, {})", d2.x, d2.y);
+      //std::println("  d1 = ({}, {})", d1.x, d1.y);
+      //std::println("  d2 = ({}, {})", d2.x, d2.y);
 
-      double D = d1.x * d2.y - d1.y * d2.x;
+      double D = d1.x * -d2.y - d1.y * -d2.x;
 
-      std::println("*** D = {}", D);
+      //std::println("  D = {}", D);
 
       double epsilon = std::numeric_limits<double>::epsilon();
-      if (D < epsilon)
+      if (std::abs(D) < epsilon)
       {
         return std::nullopt;
       }
 
-      double Nt = d2.x * (l2.start.y - l1.start.y) -
-                  d2.y * (l2.start.x - l1.start.x);
+      double Nt = (l2.start.x - l1.start.x) * -d2.y -
+                  (l2.start.y - l1.start.y) * -d2.x;
       double Nu = d1.x * (l2.start.y - l1.start.y) -
                   d1.y * (l2.start.x - l1.start.x);
 
-      std::println("*** Nt = {}", Nt);
-      std::println("*** Nu = {}", Nu);
+      //std::println("  Nt = {}", Nt);
+      //std::println("  Nu = {}", Nu);
 
       double t = Nt / D;
       double u = Nu / D;
 
-      std::println("*** t = {}", t);
-      std::println("*** u = {}", u);
+      //std::println("  t = {}", t);
+      //std::println("  u = {}", u);
 
       if ( (t > 0.0 and t < 1.0) and (u > 0.0 and u < 1.0) )
       {
-        return Point2D
+        Point2D intersectionPoint =
         {
           { l1.start.x + t * (l1.end.x - l1.start.x) },
           { l1.start.y + t * (l1.end.y - l1.start.y) }
         };
+
+        //std::println("  lines intersect at ({:4f}, {:4f})",
+        //             intersectionPoint.x, intersectionPoint.y);
+
+        return intersectionPoint;
       }
 
       return std::nullopt;
@@ -149,10 +154,10 @@ class IntersectionVisitor
       // perpendicular point.
       //
       Point2D closestToCircle =
-        {
-          { l.start.x + percentage * lineVector.x },
-          { l.start.y + percentage * lineVector.y }
-        };
+      {
+        { l.start.x + percentage * lineVector.x },
+        { l.start.y + percentage * lineVector.y }
+      };
 
       //
       // Find distance from perpendicular point to the circle's center.
@@ -192,16 +197,16 @@ class IntersectionVisitor
       double t2 = (percentage + offset) / lineVector.Length();
 
       Point2D p1 =
-        {
-          { l.start.x + t1 * lineVector.x },
-          { l.start.y + t1 * lineVector.y },
-        };
+      {
+        { l.start.x + t1 * lineVector.x },
+        { l.start.y + t1 * lineVector.y },
+      };
 
       Point2D p2 =
-        {
-          { l.start.x + t2 * lineVector.x },
-          { l.start.y + t2 * lineVector.y },
-        };
+      {
+        { l.start.x + t2 * lineVector.x },
+        { l.start.y + t2 * lineVector.y },
+      };
 
       //
       // We have a bit of a problem though: this method's signature requires to

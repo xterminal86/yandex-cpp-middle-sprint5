@@ -203,9 +203,8 @@ int main()
   */
 
   std::vector<Shape> shapes = utils::ParseShapes(
-    "line 0 0 2 2; "
-    "line 1 -1 -1 2; "
-    "line 1 2 3 4; "
+    "line 1 2 2 4; "
+    "line 2 2 1 3"
   );
 
   std::println("Parsed {} shapes", shapes.size());
