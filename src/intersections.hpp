@@ -2,6 +2,7 @@
 #include "geometry.hpp"
 #include <cmath>
 #include <optional>
+#include <print>
 
 namespace geometry::intersections {
 
@@ -39,7 +40,7 @@ class IntersectionVisitor
       // l1.sx + t*d1.x = l2.sx + u*d2.x
       // l1.sy + t*d1.y = l2.sy + u*d2.y
       //
-      // 3. Solve the system against t and u using Cramer's Rule.
+      // 3. Solve the system against 't' and 'u' using Cramer's Rule.
       //
       // t*d1.x - u*d2.x = l2.sx - l1.sx
       // t*d1.y - u*d2.y = l2.sy - l1.sy
@@ -57,7 +58,7 @@ class IntersectionVisitor
       // u = Nu / D
       //
       // If D == 0 then lines don't intersect (they're parallel or collinear).
-      // For intersection to occur t and u must fall between 0 and 1.
+      // For intersection to occur 't' and 'u' must fall between 0 and 1.
       //
       // Contact point can then be found like so:
       //
@@ -68,7 +69,12 @@ class IntersectionVisitor
       Point2D d1 = l1.end - l1.start;
       Point2D d2 = l2.end - l2.start;
 
+      std::println("d1 = ({}, {})", d1.x, d1.y);
+      std::println("d2 = ({}, {})", d2.x, d2.y);
+
       double D = d1.x * d2.y - d1.y * d2.x;
+
+      std::println("*** D = {}", D);
 
       double epsilon = std::numeric_limits<double>::epsilon();
       if (D < epsilon)
@@ -81,8 +87,14 @@ class IntersectionVisitor
       double Nu = d1.x * (l2.start.y - l1.start.y) -
                   d1.y * (l2.start.x - l1.start.x);
 
+      std::println("*** Nt = {}", Nt);
+      std::println("*** Nu = {}", Nu);
+
       double t = Nt / D;
       double u = Nu / D;
+
+      std::println("*** t = {}", t);
+      std::println("*** u = {}", u);
 
       if ( (t > 0.0 and t < 1.0) and (u > 0.0 and u < 1.0) )
       {
@@ -110,10 +122,10 @@ class IntersectionVisitor
       // Step by step explanation (d is lineVector, A -> l.start,
       // C - c.center_p):
       //
-      // 1. Our condition that we're getting at (find a point on the line so
+      // 1. Our condition that we're getting at - find a point on the line so
       //    that dot product of vector from that point to circle's center and
       //    line vector itself gives 0, since that's the marker of
-      //    perpendicularity):
+      //    perpendicularity:
       //
       // (C - (A + t*d)) * d = 0
       //
@@ -125,9 +137,9 @@ class IntersectionVisitor
       // t*(d * d) = (C - A) * d
       // t = (C - A) * d / (d * d)
       //
-      // More intuitive approach would be to normalize d first, which will leave
-      // just a dot product for calculating a projection, but this would involve
-      // calculating square root first to normalize d.
+      // More intuitive approach would be to normalize 'd' first, which will
+      // leave just a dot product for calculating a projection, but this would
+      // involve calculating square root first to normalize 'd'.
       //
       double percentage =
         circleToLine.Dot(lineVector) / lineVector.Dot(lineVector);
@@ -143,11 +155,11 @@ class IntersectionVisitor
         };
 
       //
-      // Find distance from perpendicular point to circle's center.
+      // Find distance from perpendicular point to the circle's center.
       //
       double circleToLineDist = (closestToCircle - c.center_p).Length();
 
-      // If it's greater than radius - no intersection.
+      // If it's greater than the radius - no intersection.
       if (circleToLineDist > c.radius)
       {
         return std::nullopt;
@@ -162,20 +174,19 @@ class IntersectionVisitor
 
       //
       // "Normal" intersection - two points. In this case closestToCircle
-      // point will divide line segment inside the circle in two equal parts,
-      // which we can use to find out intersection points by leveraging
-      // Pythagoras' theorem: distance from circle's center to an intersection
-      // point in this case will be equal to circle's radius (and that's a
-      // hypotenuse by the way), and perpendicular we already have
-      // (circleToLineDist). So, all that's left is to subtract hypotenuse from
-      // the leg:
+      // point will divide circle's chord into two equal parts, which we can
+      // then use to find intersection points by leveraging Pythagoras' theorem:
+      // distance from circle's center to an intersection point in this case
+      // will be equal to circle's radius (and that's a hypotenuse by the way),
+      // and perpendicular we already have (circleToLineDist).
+      // So, all that's left is to subtract hypotenuse from the leg:
       //
       double offset =
         std::sqrt(c.radius * c.radius - circleToLineDist * circleToLineDist);
 
       //
       // And now we can add / subtract this offset from perpendicular point to
-      // get intersection points.
+      // get intersection points:
       //
       double t1 = (percentage - offset) / lineVector.Length();
       double t2 = (percentage + offset) / lineVector.Length();
@@ -206,6 +217,10 @@ class IntersectionVisitor
 
     std::optional<Point2D> operator()(const Circle& c1, const Circle& c2)
     {
+      //
+      // Circle to circle collison is trivial - collision occurs if distance
+      // between circle centers is less than sum of their radiuses.
+      //
       double distance = (c1.center_p - c2.center_p).Length();
       double radSum   = c1.radius + c2.radius;
 
@@ -214,9 +229,9 @@ class IntersectionVisitor
 
       double epsilon = std::numeric_limits<double>::epsilon();
 
-      bool tooFarApart = (distance > radSum);
+      bool tooFarApart       = (distance > radSum);
       bool oneInsideTheOther = (distance < std::abs(c1.radius - c2.radius));
-      bool identical = (std::abs(c1.radius - c2.radius) < epsilon);
+      bool identical         = (std::abs(c1.radius - c2.radius) < epsilon);
 
       // No collision.
       if (tooFarApart or oneInsideTheOther or identical)
@@ -225,25 +240,27 @@ class IntersectionVisitor
       }
 
       //
-      // First, place 1st circle at (0, 0), and 2nd at the (distance, 0):
+      // Now to find actual collision point(s).
+      //
+      // First, place 1-st circle at (0, 0), and 2-nd at the (distance, 0):
       //
       // (obviously not to scale)
       //
-      //             x - collision point 1
+      //             q - collision point 1
       //            /|
       //       r1 /  |
       //        /    | h
       //      /      |
       //    /    a   |
-      // C1----------O----C2
-      //  |               |
-      //   ---------------
-      //          d
+      // C1----------x----C2
+      //  ^          |    ^
+      //  |----------|----|
+      //          d  |
+      //             |
+      //             |
+      //             w - collision point 2
       //
-      //
-      //             x - collision point 2
-      //
-      // We need to find point O (a, h). From there we just add / subtract h to
+      // We need to find point x (a, 0). From there we just add / subtract h to
       // get intersection points.
       //
       // For C1:
@@ -270,7 +287,7 @@ class IntersectionVisitor
       // a = -------------------
       //             2d
       //
-      // After which we can plug a into here to find h:
+      // After which we can plug 'a' into here to find 'h':
       //
       // h = sqrt(r1^2 - a^2)
       //
@@ -301,7 +318,7 @@ class IntersectionVisitor
         // Advance along the line connecting two circles in Y axis direction.
         double y = c1.center_p.y + (a * dy) / distance;
 
-        // Arrived at collision point.
+        // Arrived at the collision point.
         return Point2D(x, y);
       }
 

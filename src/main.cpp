@@ -16,22 +16,95 @@ using namespace geometry;
 using namespace geometry::convex_hull;
 using namespace geometry::triangulation;
 using namespace geometry::visualization;
+using namespace geometry::intersections;
 
 namespace rng = std::ranges;
 namespace views = std::ranges::views;
 
-void PrintAllIntersections(const Shape& shape, std::span<const Shape> others)
+void PrintAllIntersections(const Shape& lineOrCircle,
+                           std::span<const Shape> others)
 {
   std::println("\n=== Intersections ===");
 
   /*
-    * Используйте ranges чтобы оставить только фигуры,
-    * поддерживающие возможность находить пересечения между собой
-    *
-    * Затем примените монадический интерфейс для обработки результатов:
-    *     - Пересечение найдено в точке A между фигурами B и C
-    *     - Фигуры B и C не пересекаются
+  Используйте ranges чтобы оставить только фигуры,
+  поддерживающие возможность находить пересечения между собой
+
+  Затем примените монадический интерфейс для обработки результатов:
+      - Пересечение найдено в точке A между фигурами B и C
+      - Фигуры B и C не пересекаются
   */
+
+  auto supported =
+    others | std::views::filter(
+    [](const Shape& s)
+    {
+      return std::holds_alternative<Line>(s)
+          or std::holds_alternative<Circle>(s);
+    }
+  );
+
+  std::string figType;
+  std::string figData;
+
+  if (std::holds_alternative<Line>(lineOrCircle))
+  {
+    figType = "Line";
+    Line l = std::get<Line>(lineOrCircle);
+    figData = std::format("({}, {}) - ({}, {})",
+                          l.start.x, l.start.y, l.end.x, l.end.y);
+  }
+  else if (std::holds_alternative<Circle>(lineOrCircle))
+  {
+    figType = "Circle";
+    Circle c = std::get<Circle>(lineOrCircle);
+    figData = std::format("({}, {}), r = {}",
+                          c.center_p.x, c.center_p.y, c.radius);
+  }
+
+  for (const Shape& s : supported)
+  {
+    try
+    {
+      std::string against;
+
+      if (std::holds_alternative<Line>(s))   against = "Line";
+      if (std::holds_alternative<Circle>(s)) against = "Circle";
+
+      std::println("{} vs {}:", figType, against);
+
+      if (std::holds_alternative<Line>(s))
+      {
+        Line l = std::get<Line>(s);
+        std::println("  {} vs ({}, {}) - ({}, {})",
+                     figData,
+                     l.start.x, l.start.y, l.end.x, l.end.y);
+      }
+      else if (std::holds_alternative<Circle>(s))
+      {
+        Circle c = std::get<Circle>(s);
+        std::println("  {} vs ({}, {}), r = {}",
+                     figData,
+                     c.center_p.x, c.center_p.y, c.radius);
+      }
+
+      std::optional<Point2D> ip = GetIntersectPoint(lineOrCircle, s);
+      if (ip)
+      {
+        std::println("  contact point = ({:.4f}, {:.4f})",
+                     ip.value().x,
+                     ip.value().y);
+      }
+      else
+      {
+        std::println("  no intersection");
+      }
+    }
+    catch(std::exception& e)
+    {
+      std::println("{}", e.what());
+    }
+  }
 }
 
 // =============================================================================
@@ -117,6 +190,7 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
 
 int main()
 {
+  /*
   std::vector<Shape> shapes = utils::ParseShapes(
     "circle 0 0 1.5; "
     "line 1 2 3 4; "
@@ -125,6 +199,13 @@ int main()
     "polygon 0 0 1 2; "
     "badshape; "
     "circle 0 0 -1"
+  );
+  */
+
+  std::vector<Shape> shapes = utils::ParseShapes(
+    "line 0 0 2 2; "
+    "line 1 -1 -1 2; "
+    "line 1 2 3 4; "
   );
 
   std::println("Parsed {} shapes", shapes.size());
@@ -168,11 +249,6 @@ int main()
 
           // Это говно всё равно не работает.
           //std::println("{}", s);
-
-          for (const Point2D& p : s.Vertices())
-          {
-            std::println("  ({:7.4f}, {:7.4f})", p.x, p.y);
-          }
         }
 
         index++;

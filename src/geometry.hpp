@@ -502,6 +502,10 @@ using Shape = std::variant<
   std::monostate, Line, Triangle, Rectangle, RegularPolygon, Circle, Polygon
 >;
 
+template <typename T>
+concept IntersectionShape = std::is_same_v<std::remove_cvref_t<T>, Line>
+                         or std::is_same_v<std::remove_cvref_t<T>, Circle>;
+
 }  // namespace geometry
 
 // =============================================================================
