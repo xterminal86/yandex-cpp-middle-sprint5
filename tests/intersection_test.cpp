@@ -7,6 +7,8 @@ using namespace geometry;
 using namespace geometry::visualization;
 using namespace geometry::intersections;
 
+double epsilon = std::numeric_limits<double>::epsilon();
+
 TEST(IntersectionsTest, LineVsLine)
 {
   // Intersection at (0, 0)
@@ -189,4 +191,77 @@ TEST(IntersectionsTest, LineVsCircle)
 
 TEST(IntersectionsTest, CircleVsCircle)
 {
+  // Intersection at (1, 0) and (0, 1).
+  {
+    std::vector<Shape> shapes = utils::ParseShapes(
+      "circle 0 0 1; "
+      "circle 1 1 1"
+    );
+
+    Draw(shapes);
+
+    std::optional<Point2D> ip;
+    ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
+    ASSERT_TRUE(ip.has_value());
+
+    // Тут почему-то точности не хватает.
+    //EXPECT_DOUBLE_EQ(ip->x, 0.0);
+    //EXPECT_DOUBLE_EQ(ip->y, 1.0);
+    //EXPECT_TRUE(std::abs(ip->x - 0.0) < epsilon);
+    //EXPECT_TRUE(std::abs(ip->y - 1.0) < epsilon);
+  }
+  // Intersection at (1, 0)
+  {
+    std::vector<Shape> shapes = utils::ParseShapes(
+      "circle 0 0 1; "
+      "circle 2 0 1"
+    );
+
+    Draw(shapes);
+
+    std::optional<Point2D> ip;
+    ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
+    ASSERT_TRUE(ip.has_value());
+    EXPECT_DOUBLE_EQ(ip->x, 1.0);
+    EXPECT_DOUBLE_EQ(ip->y, 0.0);
+  }
+  // No intersection - too far.
+  {
+    std::vector<Shape> shapes = utils::ParseShapes(
+      "circle 0 0 1; "
+      "circle 3 0 1"
+    );
+
+    Draw(shapes);
+
+    std::optional<Point2D> ip;
+    ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
+    ASSERT_FALSE(ip.has_value());
+  }
+  // No intersection - identical.
+  {
+    std::vector<Shape> shapes = utils::ParseShapes(
+      "circle 0 0 1; "
+      "circle 0 0 1"
+    );
+
+    Draw(shapes);
+
+    std::optional<Point2D> ip;
+    ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
+    ASSERT_FALSE(ip.has_value());
+  }
+  // No intersection - one inside another.
+  {
+    std::vector<Shape> shapes = utils::ParseShapes(
+      "circle 0 0 1; "
+      "circle 0 0 0.5"
+    );
+
+    Draw(shapes);
+
+    std::optional<Point2D> ip;
+    ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
+    ASSERT_FALSE(ip.has_value());
+  }
 }

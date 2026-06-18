@@ -310,17 +310,32 @@ class IntersectionVisitor
       // Circle to circle collison is trivial - collision occurs if distance
       // between circle centers is less than sum of their radiuses.
       //
+      // Special cases are:
+      //
+      // 1. One circle is completely inside another - sum of radiuses will be
+      //    less than distance.
+      //
+      // 2. Circles are identical - distance is 0 and difference between
+      //    radiuses is also 0.
+      //
       double distance = (c1.center_p - c2.center_p).Length();
       double radSum   = c1.radius + c2.radius;
 
-      double dx = (c2.center_p.x - c1.center_p.x);
-      double dy = (c2.center_p.y - c1.center_p.y);
+      //std::println("d = {:4f}", distance);
+      //std::println("radSum = {:4f}", radSum);
 
       double epsilon = std::numeric_limits<double>::epsilon();
 
       bool tooFarApart       = (distance > radSum);
       bool oneInsideTheOther = (distance < std::abs(c1.radius - c2.radius));
-      bool identical         = (std::abs(c1.radius - c2.radius) < epsilon);
+      bool identical = (
+            (std::abs(c1.radius - c2.radius) < epsilon)
+        and (std::abs(distance) < epsilon)
+      );
+
+      //std::println("tooFarApart? {}", tooFarApart ? "Y" : "N");
+      //std::println("oneInsideTheOther? {}", oneInsideTheOther ? "Y" : "N");
+      //std::println("identical? {}", identical ? "Y" : "N");
 
       // No collision.
       if (tooFarApart or oneInsideTheOther or identical)
@@ -385,6 +400,9 @@ class IntersectionVisitor
       // p1 = (a,  h)
       // p2 = (a, -h)
       //
+      double dx = (c2.center_p.x - c1.center_p.x);
+      double dy = (c2.center_p.y - c1.center_p.y);
+
       double r1sq = c1.radius * c1.radius;
       double r2sq = c2.radius * c2.radius;
 
@@ -393,11 +411,16 @@ class IntersectionVisitor
       double a = (r1sq - r2sq + dsq) / (2 * distance);
       double h = std::sqrt(r1sq - a*a);
 
+      //std::println("a = {:4f}", a);
+      //std::println("h = {:4f}", h);
+
       // Tangential - one point.
       bool tangentialExternal =
         (std::abs(distance - (c1.radius + c2.radius)) < epsilon);
       bool tangentialInternal =
         (std::abs(distance - std::abs(c1.radius - c2.radius)) < epsilon);
+
+      Point2D p;
 
       if (tangentialExternal or tangentialInternal)
       {
@@ -407,8 +430,13 @@ class IntersectionVisitor
         // Advance along the line connecting two circles in Y axis direction.
         double y = c1.center_p.y + (a * dy) / distance;
 
+        p.x = x;
+        p.y = y;
+
+        //std::println("collision point = ({}, {})", p.x, p.y);
+
         // Arrived at the collision point.
-        return Point2D(x, y);
+        return p;
       }
 
       // Two points otherwise.
@@ -419,7 +447,12 @@ class IntersectionVisitor
       double y2 = c1.center_p.y + (a * dy - h * dx) / distance;
 
       // But our method's signature demands one, so...
-      return Point2D(x1, y1);
+      p.x = x1;
+      p.y = y1;
+
+      //std::println("collision point = ({}, {})", p.x, p.y);
+
+      return p;
     }
 
     template <typename T, typename U>
