@@ -23,8 +23,8 @@ TEST(IntersectionsTest, LineVsLine)
     std::optional<Point2D> ip;
     ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
     ASSERT_TRUE(ip.has_value());
-    EXPECT_DOUBLE_EQ(ip->x, 0.0);
-    EXPECT_DOUBLE_EQ(ip->y, 0.0);
+    EXPECT_DOUBLE_EQ(0.0, ip->x);
+    EXPECT_DOUBLE_EQ(0.0, ip->y);
   }
   // Intersection at (0.4, 0.8)
   {
@@ -38,8 +38,8 @@ TEST(IntersectionsTest, LineVsLine)
     std::optional<Point2D> ip;
     ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
     ASSERT_TRUE(ip.has_value());
-    EXPECT_DOUBLE_EQ(ip->x, 0.4);
-    EXPECT_DOUBLE_EQ(ip->y, 0.8);
+    EXPECT_DOUBLE_EQ(0.4, ip->x);
+    EXPECT_DOUBLE_EQ(0.8, ip->y);
   }
   // No collision - too far apart.
   {
@@ -111,8 +111,8 @@ TEST(IntersectionsTest, LineVsCircle)
     std::optional<Point2D> ip;
     ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
     ASSERT_TRUE(ip.has_value());
-    EXPECT_DOUBLE_EQ(ip->x, 0.0);
-    EXPECT_DOUBLE_EQ(ip->y, -1.0);
+    EXPECT_DOUBLE_EQ(0.0, ip->x);
+    EXPECT_DOUBLE_EQ(-1.0, ip->y);
   }
   // Intersection at (1, 0) and (0.6, -0.8)
   {
@@ -126,8 +126,8 @@ TEST(IntersectionsTest, LineVsCircle)
     std::optional<Point2D> ip;
     ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
     ASSERT_TRUE(ip.has_value());
-    EXPECT_DOUBLE_EQ(ip->x, 0.6);
-    EXPECT_DOUBLE_EQ(ip->y, -0.8);
+    EXPECT_DOUBLE_EQ(0.6, ip->x);
+    EXPECT_DOUBLE_EQ(-0.8, ip->y);
   }
   // Intersection at (0.8, 0.6) - segment starts inside the circle.
   {
@@ -141,8 +141,8 @@ TEST(IntersectionsTest, LineVsCircle)
     std::optional<Point2D> ip;
     ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
     ASSERT_TRUE(ip.has_value());
-    EXPECT_DOUBLE_EQ(ip->x, 0.8);
-    EXPECT_DOUBLE_EQ(ip->y, 0.6);
+    EXPECT_DOUBLE_EQ(0.8, ip->x);
+    EXPECT_DOUBLE_EQ(0.6, ip->y);
   }
   // Tangential intersection at (1, 0).
   {
@@ -156,8 +156,8 @@ TEST(IntersectionsTest, LineVsCircle)
     std::optional<Point2D> ip;
     ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
     ASSERT_TRUE(ip.has_value());
-    EXPECT_DOUBLE_EQ(ip->x, 1.0);
-    EXPECT_DOUBLE_EQ(ip->y, 0.0);
+    EXPECT_DOUBLE_EQ(1.0, ip->x);
+    EXPECT_DOUBLE_EQ(0.0, ip->y);
   }
   // No intersection - apart.
   {
@@ -205,8 +205,8 @@ TEST(IntersectionsTest, CircleVsCircle)
     ASSERT_TRUE(ip.has_value());
 
     // Тут почему-то точности не хватает.
-    //EXPECT_DOUBLE_EQ(ip->x, 0.0);
-    //EXPECT_DOUBLE_EQ(ip->y, 1.0);
+    //EXPECT_DOUBLE_EQ(0.0, ip->x);
+    //EXPECT_DOUBLE_EQ(1.0, ip->y);
     //EXPECT_TRUE(std::abs(ip->x - 0.0) < epsilon);
     //EXPECT_TRUE(std::abs(ip->y - 1.0) < epsilon);
   }
@@ -222,8 +222,8 @@ TEST(IntersectionsTest, CircleVsCircle)
     std::optional<Point2D> ip;
     ASSERT_NO_THROW(ip = GetIntersectPoint(shapes[0], shapes[1]));
     ASSERT_TRUE(ip.has_value());
-    EXPECT_DOUBLE_EQ(ip->x, 1.0);
-    EXPECT_DOUBLE_EQ(ip->y, 0.0);
+    EXPECT_DOUBLE_EQ(1.0, ip->x);
+    EXPECT_DOUBLE_EQ(0.0, ip->y);
   }
   // No intersection - too far.
   {
