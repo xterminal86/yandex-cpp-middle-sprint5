@@ -506,6 +506,14 @@ template <typename T>
 concept IntersectionShape = std::is_same_v<std::remove_cvref_t<T>, Line>
                          or std::is_same_v<std::remove_cvref_t<T>, Circle>;
 
+template <typename T>
+concept SupportedShape = std::is_same_v<std::remove_cvref_t<T>, Line>
+                      or std::is_same_v<std::remove_cvref_t<T>, Triangle>
+                      or std::is_same_v<std::remove_cvref_t<T>, Rectangle>
+                      or std::is_same_v<std::remove_cvref_t<T>, RegularPolygon>
+                      or std::is_same_v<std::remove_cvref_t<T>, Circle>
+                      or std::is_same_v<std::remove_cvref_t<T>, Polygon>;
+
 }  // namespace geometry
 
 // =============================================================================

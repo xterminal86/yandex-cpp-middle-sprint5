@@ -8,8 +8,10 @@ TEST(GeometryTest, Point2D)
   Point2D p1(1, 1);
   Point2D p2(2, 2);
   Point2D p3(1, 1);
+  Point2D p4(3, 2);
 
   const double sqrt2 = std::sqrt(2.0);
+  const double sqrt5 = std::sqrt(5.0);
 
   EXPECT_TRUE(p1 < p2);
 
@@ -28,5 +30,24 @@ TEST(GeometryTest, Point2D)
   EXPECT_DOUBLE_EQ(0.5, (p1 / 2.0).x);
   EXPECT_DOUBLE_EQ(0.5, (p1 / 2.0).y);
 
+  EXPECT_DOUBLE_EQ((p1.x * p2.x + p1.y * p2.y), p1.Dot(p2));
+  EXPECT_DOUBLE_EQ((p1.x * p2.y - p1.y * p2.x), p1.Cross(p2));
+  EXPECT_DOUBLE_EQ(sqrt2, p1.Length());
   EXPECT_DOUBLE_EQ(sqrt2, p1.DistanceTo(p2));
+  EXPECT_DOUBLE_EQ(sqrt5, p1.DistanceTo(p4));
+  EXPECT_DOUBLE_EQ(1.0 / sqrt2, p1.Normalize().x);
+  EXPECT_DOUBLE_EQ(1.0 / sqrt2, p1.Normalize().y);
+}
+
+// =============================================================================
+
+TEST(GeometryTest, Line)
+{
+  Point2D p(1, 2);
+
+  Line l({ 0, 0 }, { 4, 4 });
+
+  EXPECT_DOUBLE_EQ(2.0, l.Center().x);
+  EXPECT_DOUBLE_EQ(2.0, l.Center().y);
+  EXPECT_DOUBLE_EQ(1.0, p.DistanceTo(l.Center()));
 }

@@ -25,7 +25,7 @@ matplot::figure_handle DrawConfig()
   return f;
 }
 
-void Draw(std::span<geometry::Shape> shapes)
+void Draw(std::span<geometry::Shape> shapes, const std::string& plotName)
 {
   static uint64_t imageInd = 1;
 
@@ -112,7 +112,9 @@ void Draw(std::span<geometry::Shape> shapes)
   }
 
   // Display plot
-  fh->save(std::format("plot_{}.png", imageInd++));
+  fh->save(
+    std::format("{}_{}.png", (plotName.empty() ? "plot" : plotName), imageInd++)
+  );
 }
 
 void Draw(std::span<const geometry::triangulation::DelaunayTriangle> triangles)

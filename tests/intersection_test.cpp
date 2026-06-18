@@ -15,7 +15,8 @@ TEST(IntersectionsTest, LineVsLine)
   {
     std::vector<Shape> shapes = utils::ParseShapes(
       "line -1 -1 1 1; "
-      "line 1 -1 -1 1"
+      "line 1 -1 -1 1; "
+      "circle 0 0 0.01"
     );
 
     Draw(shapes);
@@ -30,7 +31,8 @@ TEST(IntersectionsTest, LineVsLine)
   {
     std::vector<Shape> shapes = utils::ParseShapes(
       "line -1 -2 1 2; "
-      "line 2 0 -2 2"
+      "line 2 0 -2 2; "
+      "circle 0.4 0.8 0.01"
     );
 
     Draw(shapes);
@@ -103,7 +105,8 @@ TEST(IntersectionsTest, LineVsCircle)
   {
     std::vector<Shape> shapes = utils::ParseShapes(
       "line -0.5 -1.5 1.5 0.5; "
-      "circle 0 0 1"
+      "circle 0 0 1; "
+      "circle 0 -1 0.01"
     );
 
     Draw(shapes);
@@ -118,7 +121,8 @@ TEST(IntersectionsTest, LineVsCircle)
   {
     std::vector<Shape> shapes = utils::ParseShapes(
       "line 0.5 -1 1.5 1; "
-      "circle 0 0 1"
+      "circle 0 0 1; "
+      "circle 0.6 -0.8 0.01"
     );
 
     Draw(shapes);
@@ -133,7 +137,8 @@ TEST(IntersectionsTest, LineVsCircle)
   {
     std::vector<Shape> shapes = utils::ParseShapes(
       "line 0.2 0 1 0.8; "
-      "circle 0 0 1"
+      "circle 0 0 1; "
+      "circle 0.8 0.6 0.01"
     );
 
     Draw(shapes);
@@ -148,7 +153,8 @@ TEST(IntersectionsTest, LineVsCircle)
   {
     std::vector<Shape> shapes = utils::ParseShapes(
       "line 1 -1 1 1; "
-      "circle 0 0 1"
+      "circle 0 0 1; "
+      "circle 1 0 0.01"
     );
 
     Draw(shapes);
@@ -195,7 +201,8 @@ TEST(IntersectionsTest, CircleVsCircle)
   {
     std::vector<Shape> shapes = utils::ParseShapes(
       "circle 0 0 1; "
-      "circle 1 1 1"
+      "circle 1 1 1; "
+      "circle 0 1 0.01"
     );
 
     Draw(shapes);
@@ -214,7 +221,8 @@ TEST(IntersectionsTest, CircleVsCircle)
   {
     std::vector<Shape> shapes = utils::ParseShapes(
       "circle 0 0 1; "
-      "circle 2 0 1"
+      "circle 2 0 1; "
+      "circle 1 0 0.01"
     );
 
     Draw(shapes);

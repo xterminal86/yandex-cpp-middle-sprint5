@@ -249,10 +249,57 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
   std::println("\n=== Shape Extra Analysis ===");
 
   /*
-    * Используйте ranges и созданные классы чтобы:
-    *     - Вывести 3 любые фигуры, которые находятся выше 50.0
-    *     - Вывести фигуры с наименьшей и с наибольшей высотами
+  Используйте ranges и созданные классы чтобы:
+      - Вывести 3 любые фигуры, которые находятся выше 50.0
+      - Вывести фигуры с наименьшей и с наибольшей высотами
   */
+
+  std::vector<Shape> higherThan50;
+  for (const Shape& s : shapes)
+  {
+    double h = GetHeight(s);
+    if (h > 50.0)
+    {
+      higherThan50.push_back(s);
+    }
+  }
+
+  if (not higherThan50.empty())
+  {
+    std::vector<Shape> random3;
+    std::sample(
+      higherThan50.cbegin(),
+      higherThan50.cend(),
+      std::back_inserter(random3),
+      3,
+      std::mt19937_64(std::random_device{}())
+    );
+
+    for (const Shape& s : random3)
+    {
+      /*
+      Point2D p = s.visit(
+        [](const auto&& sh)
+        {
+          if constexpr (SupportedShape<decltype(sh)>)
+          {
+            return Point2D::Invalid();
+          }
+          else
+          {
+            return Point2D::Invalid();
+          }
+        }
+      );
+
+      std::println("Shape higher than 50 - ({}, {})", p.x, p.y);
+      */
+    }
+
+  }
+
+
+
 }
 
 // =============================================================================
@@ -334,7 +381,7 @@ int main()
   // Важно: после изучения графика - нажмите Enter чтобы продолжить выполнение и
   // построить 2ой график
   //
-  geometry::visualization::Draw(shapes);
+  geometry::visualization::Draw(shapes, "main");
 
   //
   // Формируем список из вершин всех фигур
@@ -394,7 +441,7 @@ int main()
     Polygon p(convexHull.value());
     shapes.push_back(p);
 
-    geometry::visualization::Draw(shapes);
+    geometry::visualization::Draw(shapes, "main");
   }
 
   //

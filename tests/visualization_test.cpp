@@ -12,5 +12,5 @@ TEST(VisualizationTest, SimpleCheck)
     "line 2 2 1 3"
   );
 
-  Draw(shapes);
+  Draw(shapes, "viz");
 }
