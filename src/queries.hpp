@@ -95,9 +95,15 @@ struct DistanceVisitor
     return min_distance;
   }
 
+  //
+  // Note: fallback operator() method must be const too or you'll get fucked
+  // over by bullshit template overload satanic black magic matching rules.
+  //
   template <typename T>
-  double operator()(const T&)
+  double operator()(const T&) const
   {
+    std::println("DistanceVisitor::operator() fallback on '{}'",
+                 typeid(T).name());
     return 0.0;
   }
 };
@@ -191,7 +197,7 @@ struct PointToShapeDistanceVisitor
   }
 
   template <typename T>
-  double operator()(const T&)
+  double operator()(const T&) const
   {
     // Since it's a fallback for unsupported type we shouldn't abort
     // compilation here.
@@ -199,6 +205,8 @@ struct PointToShapeDistanceVisitor
     //  not std::is_same_v<T, T>,
     //  "Unsupported type in operator() for PointToShapeDistanceVisitor"
     //);
+    std::println("PointToShapeDistanceVisitor::operator() fallback on '{}'",
+                 typeid(T).name());
     return 0.0;
   }
 };
@@ -294,7 +302,8 @@ struct PointInShapeVisitor
 
       // We probably shouldn't abort compilation here, because it's assumed that
       // incompatible types are not overlapping.
-
+      std::println("PointInShapeVisitor::operator() fallback on '{}'",
+                   typeid(T).name());
       return false;
     }
 
@@ -362,7 +371,8 @@ struct ShapeToShapeDistanceVisitor
     //  "Unsupported type combination in operator() "
     //  "for ShapeToShapeDistanceVisitor"
     //);
-
+    std::println("ShapeToShapeDistanceVisitor::operator() fallback on '{}'",
+                 typeid(T).name());
     return std::nullopt;
   }
 };

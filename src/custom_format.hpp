@@ -35,7 +35,7 @@ struct formatter<geometry::Point2D>
   template <typename FormatContext>
   auto format(const geometry::Point2D& p, FormatContext& ctx) const
   {
-    return format_to(ctx.out(), "< Point2D ({} {}) >", p.x, p.y);
+    return format_to(ctx.out(), "< Point2D ({:.4f} {:.4f}) >", p.x, p.y);
   }
 };
 

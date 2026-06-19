@@ -124,6 +124,8 @@ void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes)
     std::mt19937_64(std::random_device{}())
   );
 
+  std::println("From {}:", p);
+
   for (const Shape& s: random5)
   {
     s.visit(

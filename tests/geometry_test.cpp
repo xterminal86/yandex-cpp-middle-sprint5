@@ -15,7 +15,7 @@ TEST(GeometryTest, Point2D)
 
   EXPECT_TRUE(p1 < p2);
 
-  // Trigger warning for some reason.
+  // Triggers warning for some reason.
   // EXPECT_TRUE((p1 == p3));
 
   EXPECT_DOUBLE_EQ(3.0, (p1 + p2).x);
@@ -50,4 +50,19 @@ TEST(GeometryTest, Line)
   EXPECT_DOUBLE_EQ(2.0, l.Center().x);
   EXPECT_DOUBLE_EQ(2.0, l.Center().y);
   EXPECT_DOUBLE_EQ(1.0, p.DistanceTo(l.Center()));
+  EXPECT_DOUBLE_EQ(4.0, l.Height());
+}
+
+// =============================================================================
+
+TEST(Distance, Test)
+{
+  Point2D p(10, 10);
+  Circle c({ 0, 0 }, 1.5);
+
+  double sqrt200 = std::sqrt(200.0);
+
+  double d = p.DistanceTo(c.center_p);
+
+  EXPECT_DOUBLE_EQ(sqrt200, d);
 }

@@ -106,7 +106,8 @@ TEST(IntersectionsTest, LineVsCircle)
     std::vector<Shape> shapes = utils::ParseShapes(
       "line -0.5 -1.5 1.5 0.5; "
       "circle 0 0 1; "
-      "circle 0 -1 0.01"
+      "circle 0 -1 0.01; "
+      "circle 1 0 0.01"
     );
 
     Draw(shapes);
@@ -122,7 +123,8 @@ TEST(IntersectionsTest, LineVsCircle)
     std::vector<Shape> shapes = utils::ParseShapes(
       "line 0.5 -1 1.5 1; "
       "circle 0 0 1; "
-      "circle 0.6 -0.8 0.01"
+      "circle 0.6 -0.8 0.01; "
+      "circle 1 0 0.01"
     );
 
     Draw(shapes);
@@ -202,7 +204,8 @@ TEST(IntersectionsTest, CircleVsCircle)
     std::vector<Shape> shapes = utils::ParseShapes(
       "circle 0 0 1; "
       "circle 1 1 1; "
-      "circle 0 1 0.01"
+      "circle 0 1 0.01; "
+      "circle 1 0 0.01"
     );
 
     Draw(shapes);

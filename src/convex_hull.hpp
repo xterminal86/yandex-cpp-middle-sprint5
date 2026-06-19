@@ -21,6 +21,7 @@ class StackForGrahamScan
     Point2D NextToTop() { return *std::prev(s.end(), 2); }
 
     std::vector<Point2D> &&Extract() & { return std::move(s); }
+    const std::vector<Point2D>& Points() { return s; }
 
   private:
     std::vector<Point2D> s;
@@ -28,6 +29,8 @@ class StackForGrahamScan
 
 //Ваш код здесь
 using GrahamScanResult = std::expected<std::vector<Point2D>, std::string>;
+
 GrahamScanResult GrahamScan(std::span<Point2D> points) noexcept;
+GrahamScanResult GrahamScanCorrect(const std::vector<Point2D>& points);
 
 }  // namespace geometry::convex_hull

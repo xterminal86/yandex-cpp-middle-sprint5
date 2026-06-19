@@ -25,7 +25,9 @@ matplot::figure_handle DrawConfig()
   return f;
 }
 
-void Draw(std::span<geometry::Shape> shapes, const std::string& plotName)
+void Draw(std::span<geometry::Shape> shapes,
+          const std::string& plotFileName,
+          const std::string& plotTitle)
 {
   static uint64_t imageInd = 1;
 
@@ -112,8 +114,15 @@ void Draw(std::span<geometry::Shape> shapes, const std::string& plotName)
   }
 
   // Display plot
+  if (not plotTitle.empty())
+  {
+    fh->title(plotTitle);
+  }
+
   fh->save(
-    std::format("{}_{}.png", (plotName.empty() ? "plot" : plotName), imageInd++)
+    std::format("{}_{}.png",
+                (plotFileName.empty() ? "plot" : plotFileName),
+                imageInd++)
   );
 }
 

@@ -9,7 +9,8 @@ TEST(VisualizationTest, SimpleCheck)
 {
   std::vector<Shape> shapes = utils::ParseShapes(
     "line 1 2 2 4; "
-    "line 2 2 1 3"
+    "line 2 2 1 3; "
+    "circle 1.3333 2.6666 0.05"
   );
 
   Draw(shapes, "viz");
