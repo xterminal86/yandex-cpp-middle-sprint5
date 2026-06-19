@@ -53,15 +53,13 @@ void PrintAllIntersections(const Shape& lineOrCircle,
   {
     figType = "Line";
     Line l = std::get<Line>(lineOrCircle);
-    figData = std::format("({}, {}) - ({}, {})",
-                          l.start.x, l.start.y, l.end.x, l.end.y);
+    figData = std::format("{} - {}", l.start, l.end);
   }
   else if (std::holds_alternative<Circle>(lineOrCircle))
   {
     figType = "Circle";
     Circle c = std::get<Circle>(lineOrCircle);
-    figData = std::format("({}, {}), r = {}",
-                          c.center_p.x, c.center_p.y, c.radius);
+    figData = std::format("{}", c);
   }
 
   for (const Shape& s : supported)
@@ -78,16 +76,12 @@ void PrintAllIntersections(const Shape& lineOrCircle,
       if (std::holds_alternative<Line>(s))
       {
         Line l = std::get<Line>(s);
-        std::println("  {} vs ({}, {}) - ({}, {})",
-                     figData,
-                     l.start.x, l.start.y, l.end.x, l.end.y);
+        std::println("  {} vs {} - {}", figData, l.start, l.end);
       }
       else if (std::holds_alternative<Circle>(s))
       {
         Circle c = std::get<Circle>(s);
-        std::println("  {} vs ({}, {}), r = {}",
-                     figData,
-                     c.center_p.x, c.center_p.y, c.radius);
+        std::println("  {} vs {}", figData, c);
       }
 
       std::optional<Point2D> ip = GetIntersectPoint(lineOrCircle, s);
@@ -135,8 +129,7 @@ void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes)
     s.visit(
       [](auto&& s)
       {
-        std::println("  calculating distance to shape '{}'",
-                     typeid(s).name());
+        std::println("  calculating distance to shape {}", s);
       }
     );
 
@@ -275,31 +268,17 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
       std::mt19937_64(std::random_device{}())
     );
 
+    std::println("Shapes higher than 50.0:");
+
     for (const Shape& s : random3)
     {
-      /*
-      Point2D p = s.visit(
-        [](const auto&& sh)
-        {
-          if constexpr (SupportedShape<decltype(sh)>)
-          {
-            return Point2D::Invalid();
-          }
-          else
-          {
-            return Point2D::Invalid();
-          }
-        }
-      );
-
-      std::println("Shape higher than 50 - ({}, {})", p.x, p.y);
-      */
+      std::println("  {}", s);
     }
-
   }
-
-
-
+  else
+  {
+    std::println("No shapes higher than 50.0 found!");
+  }
 }
 
 // =============================================================================
@@ -329,10 +308,7 @@ int main()
     s.visit(
       [i](auto&& sh)
       {
-        if constexpr (not EmptyVariant<decltype(sh)>)
-        {
-          std::println("{}. '{}'", i, typeid(sh).name());
-        }
+        std::println("{}. {}", i, sh);
       }
     );
   }
@@ -353,10 +329,7 @@ int main()
         }
         else
         {
-          std::println("{}. height = {}", index, s.Height());
-
-          // Это говно всё равно не работает.
-          //std::println("{}", s);
+          std::println("{}", s);
         }
 
         index++;
@@ -426,15 +399,8 @@ int main()
       std::println("  ({}, {})", p.x, p.y);
     }
 
-    // Почему-то это говно не работает.
-    //std::println("{}:{} - convex hull construction failed for points '{}'",
-    //             __FILE__, __LINE__, points);
-
-    // И так тоже.
-    //for (const Point2D& p : points)
-    //{
-    //  std::println("  {}", p);
-    //}
+    std::println("{}:{} - convex hull construction failed for points '{}'",
+                 __FILE__, __LINE__, points);
   }
   else
   {
