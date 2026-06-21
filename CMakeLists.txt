@@ -65,13 +65,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_imp)
 set(
   TEST_SRC_FILES
   "${CMAKE_SOURCE_DIR}/tests/main.cpp"
-  #"${CMAKE_SOURCE_DIR}/tests/convex_hull_test.cpp"
-  #"${CMAKE_SOURCE_DIR}/tests/geometry_test.cpp"
-  #"${CMAKE_SOURCE_DIR}/tests/intersection_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/convex_hull_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/geometry_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/intersection_test.cpp"
   "${CMAKE_SOURCE_DIR}/tests/queries_test.cpp"
-  #"${CMAKE_SOURCE_DIR}/tests/shape_utils_test.cpp"
-  #"${CMAKE_SOURCE_DIR}/tests/triangulation_test.cpp"
-  #"${CMAKE_SOURCE_DIR}/tests/visualization_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/shape_utils_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/triangulation_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/visualization_test.cpp"
 )
 
 add_executable(unit_tests "${TEST_SRC_FILES}")
