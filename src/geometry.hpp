@@ -55,18 +55,18 @@ struct Point2D
       return { x - other.x, y - other.y };
   }
 
-  Point2D operator*(double value) { return { x * value, y * value }; }
-  Point2D operator/(double value) { return { x / value, y / value }; }
+  Point2D operator*(double value) const { return { x * value, y * value }; }
+  Point2D operator/(double value) const { return { x / value, y / value }; }
 
   // Binary geometry operations
   [[nodiscard]]
-  double Dot(const Point2D &other) { return x * other.x + y * other.y; }
+  double Dot(const Point2D &other) const { return x * other.x + y * other.y; }
 
   [[nodiscard]]
-  double Cross(const Point2D &other) { return x * other.y - y * other.x; }
+  double Cross(const Point2D &other) const { return x * other.y - y * other.x; }
 
   [[nodiscard]]
-  double Length() { return std::sqrt(x * x + y * y); }
+  double Length() const { return std::sqrt(x * x + y * y); }
 
   [[nodiscard]]
   double DistanceTo(const Point2D &other) const
@@ -75,7 +75,7 @@ struct Point2D
   }
 
   [[nodiscard]]
-  Point2D Normalize()
+  Point2D Normalize() const
   {
     const double len = Length();
     return len > 0 ? Point2D{x / len, y / len} : Point2D{0, 0};

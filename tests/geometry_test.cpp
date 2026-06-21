@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <print>
 #include "geometry.hpp"
 
 using namespace geometry;
@@ -51,6 +52,31 @@ TEST(GeometryTest, Line)
   EXPECT_DOUBLE_EQ(2.0, l.Center().y);
   EXPECT_DOUBLE_EQ(1.0, p.DistanceTo(l.Center()));
   EXPECT_DOUBLE_EQ(4.0, l.Height());
+}
+
+// =============================================================================
+
+TEST(GeometryTest, Triangle)
+{
+  Triangle t({ 0, 0 }, { 2, 0 }, { 1, 3 });
+
+  EXPECT_DOUBLE_EQ(3.0, t.Area());
+  EXPECT_DOUBLE_EQ(3.0, t.Height());
+  EXPECT_DOUBLE_EQ(1.0, t.Center().x);
+  EXPECT_DOUBLE_EQ(1.0, t.Center().y);
+}
+
+// =============================================================================
+
+TEST(GeometryTest, Rectangle)
+{
+  Rectangle r({ 0, 0 }, 3, 2);
+
+  EXPECT_DOUBLE_EQ(3.0, r.TopRight().x);
+  EXPECT_DOUBLE_EQ(2.0, r.TopRight().y);
+  EXPECT_DOUBLE_EQ(2.0, r.Height());
+  EXPECT_DOUBLE_EQ(1.5, r.Center().x);
+  EXPECT_DOUBLE_EQ(1.0, r.Center().y);
 }
 
 // =============================================================================

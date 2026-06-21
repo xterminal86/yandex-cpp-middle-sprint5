@@ -14,7 +14,7 @@ using namespace geometry::visualization;
 
 TEST(TriangulationTest, SimpleCheck)
 {
-  std::mt19937 rng(0x123456);
+  std::mt19937_64 rng(0x123456);
   std::uniform_int_distribution<> distr(1, 10);
 
   std::vector<Point2D> points;

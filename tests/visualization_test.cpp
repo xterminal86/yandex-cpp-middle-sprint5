@@ -13,5 +13,5 @@ TEST(VisualizationTest, SimpleCheck)
     "circle 1.3333 2.6666 0.05"
   );
 
-  Draw(shapes, "viz");
+  Draw(shapes, "viz", "Vizualization test");
 }

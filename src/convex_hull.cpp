@@ -130,7 +130,8 @@ GrahamScanResult GrahamScanCorrect(const std::vector<Point2D>& points)
   double epsilon = std::numeric_limits<double>::epsilon();
 
   // 1. Find the lowest point.
-  Point2D pivot = Point2D::Invalid();
+  //Point2D pivot = Point2D::Invalid();
+  Point2D pivot = points.front();
   for (auto& p : points)
   {
     bool equalY = std::abs(p.y - pivot.y) < epsilon;
