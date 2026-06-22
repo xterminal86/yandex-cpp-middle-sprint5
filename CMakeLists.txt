@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_compile_options(-Wfatal-errors)
+add_compile_options(-Werror=return-type)
+add_compile_options(-ggdb)
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     # Не больше одной ошибки за раз
     add_compile_options(-fmax-errors=1)
@@ -32,21 +36,21 @@ CPMAddPackage(
     GIT_TAG v1.2.2
 )
 
-file(GLOB HEADER_FILES "${CMAKE_SOURCE_DIR}/include/*.hpp")
-file(GLOB SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
+file(GLOB SRC_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp" "${CMAKE_SOURCE_DIR}/src/*.hpp")
 list(REMOVE_ITEM SRC_FILES "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
 # Создаём статическую библиотеку
 add_library(${PROJECT_NAME}_imp STATIC "${CMAKE_SOURCE_DIR}/src/main.cpp" ${SRC_FILES} ${HEADER_FILES})
 
 # Добавляем в проект используемые сторонние библиотеки
-target_include_directories(${PROJECT_NAME}_imp
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-    # Помечаем используемые сторонние библиотеки как external, чтобы игнорировать их сообщения об ошибках
-    SYSTEM PUBLIC
-        ${CPM_PACKAGE_NAME_INCLUDE_DIRS}
+target_include_directories(
+  ${PROJECT_NAME}_imp
+  # Помечаем используемые сторонние библиотеки как external, чтобы игнорировать их сообщения об ошибках
+  SYSTEM PUBLIC
+  ${CMAKE_SOURCE_DIR}/src/
+  ${CPM_PACKAGE_NAME_INCLUDE_DIRS}
 )
+
 target_link_libraries(${PROJECT_NAME}_imp PRIVATE matplot)
 
 # Создаём исполняемый таргет и линкуем к нему статическую библиотеку
@@ -58,7 +62,17 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_imp)
 #
 
 # Рекурсивно ищем все используемые в тестах .cpp файлы
-file(GLOB TEST_SRC_FILES "${CMAKE_SOURCE_DIR}/tests/*.cpp")
+set(
+  TEST_SRC_FILES
+  "${CMAKE_SOURCE_DIR}/tests/main.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/convex_hull_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/geometry_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/intersection_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/queries_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/shape_utils_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/triangulation_test.cpp"
+  "${CMAKE_SOURCE_DIR}/tests/visualization_test.cpp"
+)
 
 add_executable(unit_tests "${TEST_SRC_FILES}")
 target_link_libraries(unit_tests PRIVATE ${PROJECT_NAME}_imp GTest::GTest GTest::Main)

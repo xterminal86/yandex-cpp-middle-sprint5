@@ -1,4 +1,17 @@
 #include <gtest/gtest.h>
 #include "visualization.hpp"
+#include "shape_utils.hpp"
 
-TEST(VisualizationTest, SimpleCheck) { EXPECT_EQ(1 + 1, 2); }
+using namespace geometry;
+using namespace geometry::visualization;
+
+TEST(VisualizationTest, SimpleCheck)
+{
+  std::vector<Shape> shapes = utils::ParseShapes(
+    "line 1 2 2 4; "
+    "line 2 2 1 3; "
+    "circle 1.3333 2.6666 0.05"
+  );
+
+  Draw(shapes, "viz", "Vizualization test");
+}

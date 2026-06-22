@@ -4,13 +4,15 @@
 #include <ranges>
 #include <stack>
 #include <vector>
+#include <expected>
 
 namespace geometry::convex_hull {
 
 double CrossProduct(Point2D p1, Point2D middle, Point2D p2);
 
-class StackForGrahamScan {
-public:
+class StackForGrahamScan
+{
+  public:
     void Push(const Point2D &p) { s.push_back(p); }
     void Pop() { s.pop_back(); }
 
@@ -19,12 +21,16 @@ public:
     Point2D NextToTop() { return *std::prev(s.end(), 2); }
 
     std::vector<Point2D> &&Extract() & { return std::move(s); }
+    const std::vector<Point2D>& Points() { return s; }
 
-private:
+  private:
     std::vector<Point2D> s;
 };
 
 //Ваш код здесь
-std::vector<Point2D> GrahamScan(std::span<Point2D> points);
+using GrahamScanResult = std::expected<std::vector<Point2D>, std::string>;
+
+GrahamScanResult GrahamScan(std::span<Point2D> points) noexcept;
+GrahamScanResult GrahamScanCorrect(const std::vector<Point2D>& points);
 
 }  // namespace geometry::convex_hull
