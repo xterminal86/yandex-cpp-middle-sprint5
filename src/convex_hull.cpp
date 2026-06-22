@@ -28,10 +28,8 @@ GrahamScanResult GrahamScan(std::span<Point2D> points) noexcept
     points.end(),
     [&smallest](const Point2D& p1, const Point2D& p2)
     {
-      static const auto precision = 1e-10;
-
       double cross = CrossProduct(p1, smallest, p2);
-      if (std::abs(cross) < precision)
+      if (std::abs(cross) < kError)
       {
         return smallest.DistanceTo(p1) < smallest.DistanceTo(p2);
       }
@@ -130,7 +128,6 @@ GrahamScanResult GrahamScanCorrect(const std::vector<Point2D>& points)
   double epsilon = std::numeric_limits<double>::epsilon();
 
   // 1. Find the lowest point.
-  //Point2D pivot = Point2D::Invalid();
   Point2D pivot = points.front();
   for (auto& p : points)
   {

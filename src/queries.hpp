@@ -37,37 +37,10 @@ struct DistanceVisitor
     return point.DistanceTo(projection);
   }
 
-  double operator()(const Triangle &triangle) const
+  template <CommonDistanceVisitorShape C>
+  double operator()(const C& shape) const
   {
-    auto vertices = triangle.Vertices();
-    double min_distance = std::numeric_limits<double>::max();
-
-    for (size_t i = 0; i < vertices.size(); ++i)
-    {
-      Line edge{vertices[i], vertices[(i + 1) % vertices.size()]};
-      min_distance = std::min(min_distance, (*this)(edge));
-    }
-
-    return min_distance;
-  }
-
-  double operator()(const Rectangle &rect) const
-  {
-    auto vertices = rect.Vertices();
-    double min_distance = std::numeric_limits<double>::max();
-
-    for (size_t i = 0; i < vertices.size(); ++i)
-    {
-      Line edge{vertices[i], vertices[(i + 1) % vertices.size()]};
-      min_distance = std::min(min_distance, (*this)(edge));
-    }
-
-    return min_distance;
-  }
-
-  double operator()(const RegularPolygon &polygon) const
-  {
-    auto vertices = polygon.Vertices();
+    auto vertices = shape.Vertices();
     double min_distance = std::numeric_limits<double>::max();
 
     for (size_t i = 0; i < vertices.size(); ++i)
@@ -230,7 +203,7 @@ struct PointInShapeVisitor
       Point2D point_vec = point - line.start;
 
       double cross = point_vec.Cross(line_vec);
-      if (std::abs(cross) > 1e-10)
+      if (std::abs(cross) > kError)
       {
         return false;
       }

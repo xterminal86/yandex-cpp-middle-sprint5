@@ -19,6 +19,8 @@ struct Multilambda : Ts... {
   using Ts::operator()...;
 };
 
+constexpr double kError = std::numeric_limits<double>::epsilon();
+
 namespace geometry {
 
 //
@@ -505,6 +507,12 @@ using Shape = std::variant<
 template <typename T>
 concept IntersectionShape = std::is_same_v<std::remove_cvref_t<T>, Line>
                          or std::is_same_v<std::remove_cvref_t<T>, Circle>;
+
+template <typename T>
+concept CommonDistanceVisitorShape =
+     std::is_same_v<std::remove_cvref_t<T>, Triangle>
+  or std::is_same_v<std::remove_cvref_t<T>, Rectangle>
+  or std::is_same_v<std::remove_cvref_t<T>, RegularPolygon>;
 
 template <typename T>
 concept SupportedShape = std::is_same_v<std::remove_cvref_t<T>, Line>
